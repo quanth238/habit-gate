@@ -2,13 +2,13 @@
 
 A native SwiftUI menu-bar app plus a Chrome Manifest V3 extension. Your selected websites and Mac apps remain gated until all selected daily Habitify habits due on the active habit date are complete. There is no pause or exercise bypass.
 
-**Current private alpha: macOS 1.4.0 (10), Chrome extension 1.1.1.** The [current implementation review](docs/UI-UX-REVIEW.md) maps the supplied improvement requirements to changes, screenshots, evidence and remaining release gates. `VALIDATION.md` is a chronological record; its older version sections describe historical builds.
+**Current alpha: macOS 1.4.0 (10), Chrome extension 1.1.1.** The [current implementation review](docs/UI-UX-REVIEW.md) maps the supplied improvement requirements to changes, screenshots, evidence and remaining release gates. `VALIDATION.md` is a chronological record; its older version sections describe historical builds.
 
 ![Midnight Blue blocked-page preview](design/midnight-blue/laptop-1280x640.png)
 
 ## Repository and review documents
 
-This private repository contains the Swift app and bridge, Chrome extension, automated tests, design history and engineering evidence. It is a personal private alpha, with no public release or open-source license assigned. Build instructions below create an ad-hoc signed local app; this repository does not provide a notarized installer.
+This public repository contains the Swift app and bridge, Chrome extension, automated tests, design history and engineering evidence. The app remains a personal alpha; publishing its source does not constitute a production release. An open-source license has not yet been assigned. Build instructions below create an ad-hoc signed local app; this repository does not provide a notarized installer.
 
 - [Product and engineering baseline](docs/reviews/HabitGate-Engineering-Review.pdf), with [Overleaf sources](docs/reviews/HabitGate-Engineering-Review-Overleaf.zip): historical native 1.3.0 review.
 - [UI/UX and reliability addendum](docs/reviews/HabitGate-UX-Reliability-Review.pdf), with [Overleaf sources](docs/reviews/HabitGate-UX-Reliability-Review-Overleaf.zip): native 1.4.0 / extension 1.1.1 review, before the final Midnight Blue presentation update.
