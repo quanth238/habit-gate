@@ -1,0 +1,4 @@
+[
+  {"id":1,"priority":1,"action":{"type":"redirect","redirect":{"regexSubstitution":"chrome-extension://gggclbgihkhajpchlbeakabkoaaelpdb/blocked.html?target=\\1"}},"condition":{"regexFilter":"^(https?://.*)$","requestDomains":["facebook.com","instagram.com","x.com","twitter.com","fb.com"],"resourceTypes":["main_frame"]}},
+  {"id":2,"priority":1,"action":{"type":"block"},"condition":{"initiatorDomains":["facebook.com","instagram.com","x.com","twitter.com","fb.com"],"resourceTypes":["sub_frame","stylesheet","script","image","font","object","xmlhttprequest","ping","media","websocket","other"]}}
+]

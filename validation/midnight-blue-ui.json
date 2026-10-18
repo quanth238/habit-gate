@@ -1,0 +1,126 @@
+{
+  "kind": "Local preview; current habit names with synthetic browser messaging",
+  "selectedDesign": "03 · Midnight Blue",
+  "layoutChecks": [
+    {
+      "detailsVisible": true,
+      "height": 940,
+      "horizontalOverflow": false,
+      "quote": "Progress can be quiet and still be real.",
+      "verticalOverflow": false,
+      "width": 1920
+    },
+    {
+      "detailsVisible": true,
+      "height": 820,
+      "horizontalOverflow": false,
+      "quote": "Progress can be quiet and still be real.",
+      "verticalOverflow": false,
+      "width": 1512
+    },
+    {
+      "detailsVisible": true,
+      "height": 780,
+      "horizontalOverflow": false,
+      "quote": "Progress can be quiet and still be real.",
+      "verticalOverflow": false,
+      "width": 1440
+    },
+    {
+      "detailsVisible": true,
+      "height": 640,
+      "horizontalOverflow": false,
+      "quote": "Progress can be quiet and still be real.",
+      "verticalOverflow": false,
+      "width": 1280
+    },
+    {
+      "detailsVisible": true,
+      "height": 576,
+      "horizontalOverflow": false,
+      "quote": "Progress can be quiet and still be real.",
+      "verticalOverflow": false,
+      "width": 1024
+    },
+    {
+      "detailsVisible": true,
+      "height": 500,
+      "horizontalOverflow": false,
+      "quote": "Progress can be quiet and still be real.",
+      "verticalOverflow": false,
+      "width": 800
+    },
+    {
+      "detailsVisible": true,
+      "height": 844,
+      "horizontalOverflow": false,
+      "quote": "Progress can be quiet and still be real.",
+      "verticalOverflow": false,
+      "width": 390
+    },
+    {
+      "detailsVisible": true,
+      "height": 360,
+      "horizontalOverflow": false,
+      "quote": "Progress can be quiet and still be real.",
+      "verticalOverflow": false,
+      "width": 640
+    }
+  ],
+  "stateChecks": [
+    {
+      "continueVisible": true,
+      "notice": "",
+      "overflow": false,
+      "path": "/complete/blocked.html",
+      "title": "You’re all set."
+    },
+    {
+      "continueVisible": true,
+      "notice": "",
+      "overflow": false,
+      "path": "/rest/blocked.html",
+      "title": "A day to recharge."
+    },
+    {
+      "continueVisible": false,
+      "notice": "Website protection needs attention. View details.",
+      "overflow": false,
+      "path": "/permissions/blocked.html",
+      "title": "Blocked for now."
+    },
+    {
+      "continueVisible": false,
+      "notice": "Sync needs attention. View details.",
+      "overflow": false,
+      "path": "/offline/blocked.html",
+      "title": "Blocked for now."
+    },
+    {
+      "continueVisible": false,
+      "notice": "",
+      "overflow": false,
+      "path": "/missing/blocked.html",
+      "title": "Blocked for now."
+    }
+  ],
+  "dialogChecks": {
+    "closed": true,
+    "focus": "details"
+  },
+  "browserTestsPassed": 20,
+  "contrastRatios": {
+    "mainText": 13.63,
+    "secondaryText": 7.4,
+    "buttonText": 9,
+    "detailsMutedText": 6.11
+  },
+  "contrastScope": "Calculated foreground/background pairs; not a complete accessibility audit",
+  "nativeCodeChanged": false,
+  "newTimers": false,
+  "newNetworkRequests": false,
+  "installedAt": "2026-10-18T14:57:59.479244+00:00",
+  "installedFilesMatchSource": true,
+  "configurationBytesUnchanged": true,
+  "manifestVersion": "1.1.1"
+}

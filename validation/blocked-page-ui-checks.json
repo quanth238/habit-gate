@@ -1,0 +1,97 @@
+{
+  "transport": "Local preview with mock extension messaging; alternate progress states are illustrative.",
+  "desktopViewport": {
+    "width": 1440,
+    "height": 960
+  },
+  "narrowViewport": {
+    "width": 390,
+    "height": 844
+  },
+  "states": [
+    {
+      "mode": "partial",
+      "continueVisible": false,
+      "count": "1 of 3 complete",
+      "heading": "Your habits\ncome first.",
+      "overflow": false,
+      "permissionsVisible": false,
+      "remaining": "2 habits remaining. One step at a time.",
+      "status": "Synced 02:05 AM · Checked every minute"
+    },
+    {
+      "mode": "complete",
+      "continueVisible": true,
+      "count": "3 of 3 complete",
+      "heading": "Essentials done.\nTime for you.",
+      "overflow": false,
+      "permissionsVisible": false,
+      "remaining": "A little effort. A day well started.",
+      "status": "Synced 02:05 AM · Checked every minute"
+    },
+    {
+      "mode": "rest",
+      "continueVisible": true,
+      "count": "Verified rest day",
+      "heading": "No habits due.\nEnjoy your day.",
+      "overflow": false,
+      "permissionsVisible": false,
+      "remaining": "A verified rest day. Make it yours.",
+      "status": "Synced 02:05 AM · Checked every minute"
+    },
+    {
+      "mode": "offline",
+      "continueVisible": false,
+      "count": "0 of 3 complete",
+      "heading": "Your habits\ncome first.",
+      "overflow": false,
+      "permissionsVisible": false,
+      "remaining": "3 habits remaining. One step at a time.",
+      "status": "Cannot reach Habitify. Access stays blocked until completion is verified."
+    },
+    {
+      "mode": "permissions",
+      "continueVisible": false,
+      "count": "0 of 3 complete",
+      "heading": "Your habits\ncome first.",
+      "overflow": false,
+      "permissionsVisible": true,
+      "remaining": "3 habits remaining. One step at a time.",
+      "status": "Synced 02:05 AM · Checked every minute"
+    },
+    {
+      "mode": "error",
+      "continueVisible": false,
+      "count": "Checking",
+      "heading": "Access needs\nverification.",
+      "overflow": false,
+      "permissionsVisible": false,
+      "remaining": "Waiting for a verified connection.",
+      "status": "Unable to verify access. Open Habit Gate on your Mac."
+    },
+    {
+      "mode": "long",
+      "continueVisible": false,
+      "count": "0 of 3 complete",
+      "heading": "Your habits\ncome first.",
+      "overflow": false,
+      "permissionsVisible": false,
+      "remaining": "3 habits remaining. One step at a time.",
+      "status": "Synced 02:05 AM · Checked every minute"
+    },
+    {
+      "mode": "light",
+      "continueVisible": false,
+      "count": "0 of 3 complete",
+      "heading": "Your habits\ncome first.",
+      "overflow": false,
+      "permissionsVisible": false,
+      "remaining": "3 habits remaining. One step at a time.",
+      "status": "Synced 02:05 AM · Checked every minute"
+    }
+  ],
+  "popupHeight": 588.84,
+  "popupOverflow": false,
+  "keyboardTabFocus": "sync",
+  "syncButtonReenabled": true
+}

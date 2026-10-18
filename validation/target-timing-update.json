@@ -1,0 +1,73 @@
+{
+  "checkedAt": "2026-10-18T06:28:23.157319+00:00",
+  "appVersion": "1.3.0",
+  "build": "8",
+  "rules": {
+    "habitEdits": "next local 4 AM",
+    "targetAdditions": "active on save; Chrome normally reads within 30 seconds, permission required",
+    "targetRemovals": "next local 4 AM"
+  },
+  "tests": {
+    "swift": 46,
+    "browser": 8,
+    "total": 54,
+    "passed": true,
+    "swiftLogSHA256": "1644abd49ab2bc8c8049ff11f9e5fb0b605f89a5e44d3d267802e5aac280e703",
+    "coreTimingRegressions": 8,
+    "appGuardTimingRegression": 1
+  },
+  "installation": {
+    "signatureVerified": true,
+    "nativeProtocolChecksPassed": true,
+    "browserFilesChanged": false
+  },
+  "liveMigration": {
+    "activeHabits": 7,
+    "pendingHabits": 8,
+    "activeAppCount": 5,
+    "messengerInActiveDomains": true,
+    "messengerInSnapshot": true,
+    "pendingEffectiveAt": "2026-10-18T21:00:00Z",
+    "pendingHabitEditsNotActivated": true
+  },
+  "independentWebsiteSave": {
+    "unsavedHabitDraftChanged": true,
+    "websiteSavePerformedWithUnchangedDomains": true,
+    "savedConfigurationUnchanged": true,
+    "unsavedHabitDraftRestored": true
+  },
+  "liveAppGuard": {
+    "target": "Discord",
+    "foregroundAttemptIntercepted": true,
+    "habitNoticeObserved": true,
+    "forcedTermination": false
+  },
+  "sync": {
+    "lastSuccessfulAt": "2026-10-18T06:28:16Z",
+    "access": "blocked",
+    "journalWritesPerformed": false
+  },
+  "chrome": {
+    "userReportedApproval": true,
+    "freshClientChecks": [
+      {
+        "permissionsOK": false,
+        "privateAccess": false,
+        "seenAt": "2026-10-18T06:28:05Z"
+      }
+    ],
+    "permissionsConfirmed": false,
+    "privateBrowsingEnabled": false,
+    "limitation": "Fresh heartbeat still reports missing permission; Messenger coverage is not confirmed."
+  },
+  "performance": {
+    "newProfilePerformed": false,
+    "historicalMeasurementsRemainAttributedTo": "1.2.1 (6)"
+  },
+  "remainingLiveMatrix": [
+    "real habit completion/unlock/undo",
+    "exact reset and sleep/wake/timezone transitions",
+    "redirect chains and existing selected browser tabs",
+    "all configured apps after clean login"
+  ]
+}

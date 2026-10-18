@@ -1,0 +1,14 @@
+{
+  "checkedAt": "2026-10-18T05:26:24.407272+00:00",
+  "version": "1.2.1",
+  "build": "6",
+  "restoredOriginalSignedBinary": true,
+  "restoredOriginalSources": true,
+  "configurationHashUnchanged": true,
+  "launchAtLogin": "on, verified in native Preferences",
+  "lastSuccessfulSync": "2026-10-18T05:25:37Z",
+  "syncError": null,
+  "nativeTests": 37,
+  "browserTests": 8,
+  "experimentalRefactor": "reverted at user request; no clear practical benefit established"
+}

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Habit Gate · A little focus</title>
+  <link rel="icon" type="image/svg+xml" href="brand.svg">
+  <link rel="stylesheet" href="blocked.css"><script type="module" src="page.js"></script>
+</head>
+<body class="blocked-page minimal-page" data-access="blocked">
+  <main class="focus-page" aria-labelledby="title">
+    <section class="focus-message">
+      <div class="focus-brand"><svg class="focus-shield" viewBox="10 9 44 46" width="28" height="30" aria-hidden="true"><path d="M32 13c7 4 12 5 16 6v14c0 10-9 16-16 19-7-3-16-9-16-19V19c4-1 9-2 16-6Z" fill="currentColor"/><path d="m24 32 6 6 11-12" fill="none" stroke="var(--bg)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Habit Gate</span></div>
+      <h1 id="title">Blocked for now.</h1>
+      <p id="reason" class="subtitle">Checking your essential habits…</p>
+      <div class="actions">
+        <button id="continue" class="primary" hidden>Continue to website <span aria-hidden="true">↗</span></button>
+        <button id="open" class="primary">Open Habitify</button>
+      </div>
+      <div class="utility-row"><button id="back" class="back-button">Go back</button><span aria-hidden="true">·</span><button id="details" class="details-button" aria-haspopup="dialog">View details</button></div>
+      <blockquote id="quote" class="focus-quote"></blockquote>
+      <p id="notice" class="notice" role="status" aria-live="polite" hidden></p>
+    </section>
+  </main>
+  <dialog id="details-dialog" aria-labelledby="details-title">
+    <header class="details-header"><div><p class="eyebrow">HABIT GATE</p><h2 id="details-title">Your essentials</h2></div><button id="close-details" class="close-button" aria-label="Close details">✕</button></header>
+    <div class="details-content">
+      <p id="remaining" class="remaining">Checking your progress…</p>
+      <div class="progress-caption"><span id="count">Checking</span><span id="progress-percent">0%</span></div>
+      <progress id="progress" max="1" value="0" aria-label="Essential habit progress"></progress>
+      <ul id="habits" aria-label="Remaining essential habits"></ul>
+      <p id="empty-message" class="empty-message" hidden></p>
+      <div class="day-details"><span>Habit date <strong id="date">Checking…</strong></span><span>Resets at <strong>4:00 AM</strong></span></div>
+      <p id="late-night-note" class="late-night">Before 4 AM, record late-night check-ins on the habit date shown here.</p>
+      <div class="sync-row"><p id="status" role="status" aria-live="polite">Connecting to Habit Gate…</p><button id="sync" class="secondary">Sync now</button></div>
+      <p id="coverage" class="coverage-note" role="status"></p>
+      <button id="permissions" class="secondary permission-button" hidden>Grant access to configured websites</button>
+    </div>
+  </dialog>
+</body>
+</html>

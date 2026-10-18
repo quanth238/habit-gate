@@ -1,0 +1,114 @@
+import Testing
+import Foundation
+import GateCore
+@testable import HabitGate
+
+@MainActor final class FakeGuardedApp: GuardedApplication {
+    var bundleIdentifier: String?
+    var isHidden = false
+    var isActive = false
+    var isTerminated = false
+    var canHide = true
+    var hideCalls = 0
+    init(_ id: String, active: Bool = false) { bundleIdentifier = id; isActive = active }
+    func hide() -> Bool {
+        hideCalls += 1
+        if canHide { isHidden = true }
+        return canHide
+    }
+}
+
+@Suite(.serialized) @MainActor struct AppBlockerTests {
+    let target = BlockedApp(bundleID: "com.hnc.Discord", name: "Discord")
+    @Test func hidesOnlySelectedAppsAndShowsGateForForeground() {
+        let discord = FakeGuardedApp(target.bundleID, active: true)
+        let work = FakeGuardedApp("com.example.Work")
+        let blocker = AppBlocker(running: { [discord, work] }, frontmost: { discord })
+        var shown: [String] = []
+        blocker.onBlocked = { shown.append($0.bundleID) }
+        blocker.update(apps: [target], snapshot: .locked())
+        #expect(discord.hideCalls == 1); #expect(work.hideCalls == 0)
+        #expect(shown == [target.bundleID])
+        blocker.update(apps: [target], snapshot: .locked())
+        #expect(discord.hideCalls == 1)
+    }
+    @Test func newlySelectedAppIsHiddenNowAndRemovalWaitsUntilBoundary() {
+        let discord = FakeGuardedApp(target.bundleID)
+        let added = FakeGuardedApp("ru.keepcoder.Telegram", active: true)
+        let telegram = BlockedApp(bundleID: "ru.keepcoder.Telegram", name: "Telegram")
+        let blocker = AppBlocker(running: { [discord, added] }, frontmost: { added })
+        let now = Date()
+        var configuration = Configuration(active: .init(habitIDs: ["a"], apps: [target]))
+        let snapshot = GateSnapshot.locked(now: now)
+        blocker.update(apps: configuration.active!.apps, snapshot: snapshot)
+        #expect(!added.isHidden)
+        configuration.stage(.init(habitIDs: ["b"], apps: [target, telegram]), now: now)
+        blocker.update(apps: configuration.active!.apps, snapshot: snapshot)
+        #expect(added.isHidden); #expect(configuration.active?.habitIDs == ["a"])
+        configuration.stage(.init(habitIDs: ["b"], apps: [target]), now: now)
+        added.isHidden = false
+        blocker.update(apps: configuration.active!.apps, snapshot: snapshot)
+        #expect(added.isHidden)
+        configuration.advance(now: HabitDay(now: now).end)
+        added.isHidden = false
+        blocker.update(apps: configuration.active!.apps, snapshot: snapshot)
+        #expect(!added.isHidden)
+    }
+    @Test func activationRelocksAndBackgroundAppsDoNotStealFocus() {
+        let discord = FakeGuardedApp(target.bundleID)
+        let blocker = AppBlocker(running: { [discord] }, frontmost: { discord })
+        var gates = 0; blocker.onBlocked = { _ in gates += 1 }
+        blocker.update(apps: [target], snapshot: .locked())
+        #expect(discord.isHidden); #expect(gates == 0)
+        discord.isHidden = false; discord.isActive = true
+        blocker.enforce(discord)
+        #expect(discord.hideCalls == 2); #expect(gates == 1)
+    }
+    @Test func verifiedUnlockAndExpiryUseTheSameProof() {
+        let now = Date()
+        var proof = GateSnapshot.locked(now: now)
+        proof.access = "allowed"; proof.lastSyncedAt = now
+        let discord = FakeGuardedApp(target.bundleID, active: true)
+        let blocker = AppBlocker(running: { [discord] }, frontmost: { discord })
+        blocker.update(apps: [target], snapshot: proof, now: now)
+        #expect(discord.hideCalls == 0)
+        blocker.update(apps: [target], snapshot: proof, now: proof.expiresAt)
+        #expect(discord.hideCalls == 1)
+        discord.isHidden = false
+        blocker.update(apps: [target], snapshot: .locked(), now: now)
+        #expect(discord.hideCalls == 2)
+    }
+    @Test func failureIsReportedAndTerminatedAppsAreIgnored() async throws {
+        let discord = FakeGuardedApp(target.bundleID, active: true); discord.canHide = false
+        let blocker = AppBlocker(running: { [discord] }, frontmost: { discord })
+        var issue = ""; var gates = 0
+        blocker.onIssue = { issue = $0 }; blocker.onBlocked = { _ in gates += 1 }
+        blocker.update(apps: [target], snapshot: .locked())
+        try await Task.sleep(for: .milliseconds(850))
+        #expect(issue.contains("Could not hide Discord")); #expect(gates == 0)
+        discord.isTerminated = true
+        blocker.enforce(discord)
+        #expect(discord.hideCalls == 3)
+    }
+    @Test func anotherSuccessfulHideDoesNotClearAnExistingFailure() async throws {
+        let discord = FakeGuardedApp(target.bundleID); discord.canHide = false
+        let other = FakeGuardedApp("com.example.Other")
+        let blocker = AppBlocker(running: { [discord, other] }, frontmost: { nil })
+        var issue = ""; blocker.onIssue = { issue = $0 }
+        blocker.update(apps: [target, .init(bundleID: "com.example.Other", name: "Other")], snapshot: .locked())
+        try await Task.sleep(for: .milliseconds(850))
+        #expect(other.isHidden); #expect(issue.contains("Discord"))
+        discord.canHide = true; blocker.enforce(discord)
+        #expect(issue.isEmpty)
+    }
+    @Test func aConcurrentHideIsVerifiedWithoutAFalseFailure() async throws {
+        let discord = FakeGuardedApp(target.bundleID, active: true); discord.canHide = false
+        let blocker = AppBlocker(running: { [discord] }, frontmost: { discord })
+        var issue = ""; var gates = 0
+        blocker.onIssue = { issue = $0 }; blocker.onBlocked = { _ in gates += 1 }
+        blocker.update(apps: [target], snapshot: .locked())
+        discord.isHidden = true
+        try await Task.sleep(for: .milliseconds(250))
+        #expect(issue.isEmpty); #expect(gates == 1)
+    }
+}

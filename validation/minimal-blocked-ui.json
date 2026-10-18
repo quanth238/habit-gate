@@ -1,0 +1,183 @@
+{
+  "kind": "Isolated local preview; real habit names, synthetic alternate states",
+  "layoutChecks": [
+    {
+      "detailsVisible": true,
+      "height": 940,
+      "horizontalOverflow": false,
+      "mainBottom": 682,
+      "quote": "“Make a little room for the person you want to become.”",
+      "verticalOverflow": false,
+      "width": 1920
+    },
+    {
+      "detailsVisible": true,
+      "height": 820,
+      "horizontalOverflow": false,
+      "mainBottom": 622,
+      "quote": "“Make a little room for the person you want to become.”",
+      "verticalOverflow": false,
+      "width": 1512
+    },
+    {
+      "detailsVisible": true,
+      "height": 780,
+      "horizontalOverflow": false,
+      "mainBottom": 602,
+      "quote": "“Make a little room for the person you want to become.”",
+      "verticalOverflow": false,
+      "width": 1440
+    },
+    {
+      "detailsVisible": true,
+      "height": 640,
+      "horizontalOverflow": false,
+      "mainBottom": 530,
+      "quote": "“Make a little room for the person you want to become.”",
+      "verticalOverflow": false,
+      "width": 1280
+    },
+    {
+      "detailsVisible": true,
+      "height": 576,
+      "horizontalOverflow": false,
+      "mainBottom": 471,
+      "quote": "“Make a little room for the person you want to become.”",
+      "verticalOverflow": false,
+      "width": 1024
+    },
+    {
+      "detailsVisible": true,
+      "height": 500,
+      "horizontalOverflow": false,
+      "mainBottom": 433,
+      "quote": "“Make a little room for the person you want to become.”",
+      "verticalOverflow": false,
+      "width": 800
+    },
+    {
+      "detailsVisible": true,
+      "height": 844,
+      "horizontalOverflow": false,
+      "mainBottom": 636,
+      "quote": "“Make a little room for the person you want to become.”",
+      "verticalOverflow": false,
+      "width": 390
+    },
+    {
+      "detailsVisible": true,
+      "height": 360,
+      "horizontalOverflow": false,
+      "mainBottom": 333,
+      "quote": "“Make a little room for the person you want to become.”",
+      "verticalOverflow": false,
+      "width": 640
+    }
+  ],
+  "stateChecks": [
+    {
+      "continueVisible": true,
+      "description": "Your essentials are complete. Messenger is ready for you.",
+      "detailsInitiallyClosed": true,
+      "heading": "You’re all set.",
+      "notice": "",
+      "overflow": false,
+      "path": "/complete/blocked.html"
+    },
+    {
+      "continueVisible": true,
+      "description": "Your rest day is verified. Enjoy your time.",
+      "detailsInitiallyClosed": true,
+      "heading": "A day to recharge.",
+      "notice": "",
+      "overflow": false,
+      "path": "/rest/blocked.html"
+    },
+    {
+      "continueVisible": false,
+      "description": "Complete your 6 remaining habits to open Messenger.",
+      "detailsInitiallyClosed": true,
+      "heading": "Blocked for now.",
+      "notice": "Sync needs attention. View details.",
+      "overflow": false,
+      "path": "/offline/blocked.html"
+    },
+    {
+      "continueVisible": false,
+      "description": "Complete your 6 remaining habits to open Messenger.",
+      "detailsInitiallyClosed": true,
+      "heading": "Blocked for now.",
+      "notice": "Website protection needs attention. View details.",
+      "overflow": false,
+      "path": "/permissions/blocked.html"
+    },
+    {
+      "continueVisible": false,
+      "description": "Complete your 6 remaining habits to open Messenger.",
+      "detailsInitiallyClosed": true,
+      "heading": "Blocked for now.",
+      "notice": "Connection unavailable. Open Habit Gate on your Mac.",
+      "overflow": false,
+      "path": "/error/blocked.html"
+    },
+    {
+      "continueVisible": false,
+      "description": "Complete your 6 remaining habits to open Messenger.",
+      "detailsInitiallyClosed": true,
+      "heading": "Blocked for now.",
+      "notice": "",
+      "overflow": false,
+      "path": "/long/blocked.html"
+    },
+    {
+      "continueVisible": false,
+      "description": "A selected habit needs attention. Review Essential habits in the Mac app.",
+      "detailsInitiallyClosed": true,
+      "heading": "Blocked for now.",
+      "notice": "",
+      "overflow": false,
+      "path": "/missing/blocked.html"
+    },
+    {
+      "continueVisible": false,
+      "description": "Complete your 18 remaining habits to open Messenger.",
+      "detailsInitiallyClosed": true,
+      "heading": "Blocked for now.",
+      "notice": "",
+      "overflow": false,
+      "path": "/many/blocked.html"
+    },
+    {
+      "continueVisible": false,
+      "description": "Complete your remaining essential habits in Habitify.",
+      "detailsInitiallyClosed": true,
+      "heading": "Blocked for now.",
+      "notice": "",
+      "overflow": false,
+      "path": "/empty/blocked.html"
+    }
+  ],
+  "dialogChecks": {
+    "escapeCloses": true,
+    "focusReturnsToDetails": true,
+    "many": {
+      "dialogScrolls": true,
+      "dialogWithinViewport": true,
+      "habitRows": 18,
+      "pageOverflow": false
+    }
+  },
+  "quoteStayedStill": true,
+  "quoteSource": "Local original encouragement; chosen once per document; no service or additional timer",
+  "browserTestsPassed": 20,
+  "installedAt": "2026-10-18T07:51:09.105647+00:00",
+  "installedFilesMatchSource": true,
+  "manifestVersion": "1.1.1",
+  "liveChromeMetadata": {
+    "title": "Habit Gate · A little focus",
+    "url": "chrome-extension://gggclbgihkhajpchlbeakabkoaaelpdb/blocked.html?target=https://www.messenger.com",
+    "scope": "Observed after direct HTTPS Messenger navigation; extension-page content was not automated."
+  },
+  "policyMatchesPreUpdate": true,
+  "nativeCodeChanged": false
+}

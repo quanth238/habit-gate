@@ -1,0 +1,338 @@
+[
+  {
+    "name": "before 4 AM",
+    "now": "2026-10-17T20:59:00Z",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "snapshot": {
+      "version": 1,
+      "access": "allowed",
+      "habitDate": "2026-10-17",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "utcOffsetMinutes": 420,
+      "expiresAt": "2026-10-17T21:00:00Z",
+      "lastSyncedAt": "2026-10-17T20:58:00Z",
+      "reason": "Fixture only",
+      "habits": [
+        {
+          "id": "a",
+          "name": "Fixture habit",
+          "due": true,
+          "status": "completed",
+          "detail": ""
+        }
+      ],
+      "domains": [
+        "x.com"
+      ]
+    },
+    "allowed": true
+  },
+  {
+    "name": "exact expiry",
+    "now": "2026-10-17T21:00:00Z",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "snapshot": {
+      "version": 1,
+      "access": "allowed",
+      "habitDate": "2026-10-17",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "utcOffsetMinutes": 420,
+      "expiresAt": "2026-10-17T21:00:00Z",
+      "lastSyncedAt": "2026-10-17T20:58:00Z",
+      "reason": "Fixture only",
+      "habits": [
+        {
+          "id": "a",
+          "name": "Fixture habit",
+          "due": true,
+          "status": "completed",
+          "detail": ""
+        }
+      ],
+      "domains": [
+        "x.com"
+      ]
+    },
+    "allowed": false
+  },
+  {
+    "name": "midnight keeps previous day",
+    "now": "2026-10-17T17:00:00Z",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "snapshot": {
+      "version": 1,
+      "access": "allowed",
+      "habitDate": "2026-10-17",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "utcOffsetMinutes": 420,
+      "expiresAt": "2026-10-17T21:00:00Z",
+      "lastSyncedAt": "2026-10-17T16:59:00Z",
+      "reason": "Fixture only",
+      "habits": [
+        {
+          "id": "a",
+          "name": "Fixture habit",
+          "due": true,
+          "status": "completed",
+          "detail": ""
+        }
+      ],
+      "domains": [
+        "x.com"
+      ]
+    },
+    "allowed": true
+  },
+  {
+    "name": "clock rollback",
+    "now": "2026-10-17T20:00:00Z",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "snapshot": {
+      "version": 1,
+      "access": "allowed",
+      "habitDate": "2026-10-17",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "utcOffsetMinutes": 420,
+      "expiresAt": "2026-10-17T21:00:00Z",
+      "lastSyncedAt": "2026-10-17T20:58:00Z",
+      "reason": "Fixture only",
+      "habits": [
+        {
+          "id": "a",
+          "name": "Fixture habit",
+          "due": true,
+          "status": "completed",
+          "detail": ""
+        }
+      ],
+      "domains": [
+        "x.com"
+      ]
+    },
+    "allowed": false
+  },
+  {
+    "name": "timezone offset changes",
+    "now": "2026-10-17T20:59:00Z",
+    "timezone": "America/New_York",
+    "snapshot": {
+      "version": 1,
+      "access": "allowed",
+      "habitDate": "2026-10-17",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "utcOffsetMinutes": 420,
+      "expiresAt": "2026-10-17T21:00:00Z",
+      "lastSyncedAt": "2026-10-17T20:58:00Z",
+      "reason": "Fixture only",
+      "habits": [
+        {
+          "id": "a",
+          "name": "Fixture habit",
+          "due": true,
+          "status": "completed",
+          "detail": ""
+        }
+      ],
+      "domains": [
+        "x.com"
+      ]
+    },
+    "allowed": false
+  },
+  {
+    "name": "IANA alias",
+    "now": "2026-10-17T20:59:00Z",
+    "timezone": "Asia/Saigon",
+    "snapshot": {
+      "version": 1,
+      "access": "allowed",
+      "habitDate": "2026-10-17",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "utcOffsetMinutes": 420,
+      "expiresAt": "2026-10-17T21:00:00Z",
+      "lastSyncedAt": "2026-10-17T20:58:00Z",
+      "reason": "Fixture only",
+      "habits": [
+        {
+          "id": "a",
+          "name": "Fixture habit",
+          "due": true,
+          "status": "completed",
+          "detail": ""
+        }
+      ],
+      "domains": [
+        "x.com"
+      ]
+    },
+    "allowed": true
+  },
+  {
+    "name": "missing verification",
+    "now": "2026-10-17T20:59:00Z",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "snapshot": {
+      "version": 1,
+      "access": "allowed",
+      "habitDate": "2026-10-17",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "utcOffsetMinutes": 420,
+      "expiresAt": "2026-10-17T21:00:00Z",
+      "lastSyncedAt": null,
+      "reason": "Fixture only",
+      "habits": [
+        {
+          "id": "a",
+          "name": "Fixture habit",
+          "due": true,
+          "status": "completed",
+          "detail": ""
+        }
+      ],
+      "domains": [
+        "x.com"
+      ]
+    },
+    "allowed": false
+  },
+  {
+    "name": "partial contradicts allowed",
+    "now": "2026-10-17T20:59:00Z",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "snapshot": {
+      "version": 1,
+      "access": "allowed",
+      "habitDate": "2026-10-17",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "utcOffsetMinutes": 420,
+      "expiresAt": "2026-10-17T21:00:00Z",
+      "lastSyncedAt": "2026-10-17T20:58:00Z",
+      "reason": "Fixture only",
+      "habits": [
+        {
+          "id": "a",
+          "name": "Fixture",
+          "due": true,
+          "status": "inprogress",
+          "detail": ""
+        }
+      ],
+      "domains": [
+        "x.com"
+      ]
+    },
+    "allowed": false
+  },
+  {
+    "name": "rest day",
+    "now": "2026-10-17T20:59:00Z",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "snapshot": {
+      "version": 1,
+      "access": "allowed",
+      "habitDate": "2026-10-17",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "utcOffsetMinutes": 420,
+      "expiresAt": "2026-10-17T21:00:00Z",
+      "lastSyncedAt": "2026-10-17T20:58:00Z",
+      "reason": "Fixture only",
+      "habits": [
+        {
+          "id": "a",
+          "name": "Fixture",
+          "due": false,
+          "status": "notDue",
+          "detail": ""
+        }
+      ],
+      "domains": [
+        "x.com"
+      ]
+    },
+    "allowed": true
+  },
+  {
+    "name": "configuration problem",
+    "now": "2026-10-17T20:59:00Z",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "snapshot": {
+      "version": 1,
+      "access": "allowed",
+      "habitDate": "2026-10-17",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "utcOffsetMinutes": 420,
+      "expiresAt": "2026-10-17T21:00:00Z",
+      "lastSyncedAt": "2026-10-17T20:58:00Z",
+      "reason": "Fixture only",
+      "habits": [
+        {
+          "id": "a",
+          "name": "Fixture",
+          "due": false,
+          "status": "configuration",
+          "detail": ""
+        }
+      ],
+      "domains": [
+        "x.com"
+      ]
+    },
+    "allowed": false
+  },
+  {
+    "name": "future expiry beyond boundary",
+    "now": "2026-10-17T20:59:00Z",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "snapshot": {
+      "version": 1,
+      "access": "allowed",
+      "habitDate": "2026-10-17",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "utcOffsetMinutes": 420,
+      "expiresAt": "2026-10-18T21:00:00Z",
+      "lastSyncedAt": "2026-10-17T20:58:00Z",
+      "reason": "Fixture only",
+      "habits": [
+        {
+          "id": "a",
+          "name": "Fixture habit",
+          "due": true,
+          "status": "completed",
+          "detail": ""
+        }
+      ],
+      "domains": [
+        "x.com"
+      ]
+    },
+    "allowed": false
+  },
+  {
+    "name": "unsupported schema",
+    "now": "2026-10-17T20:59:00Z",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "snapshot": {
+      "version": 2,
+      "access": "allowed",
+      "habitDate": "2026-10-17",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "utcOffsetMinutes": 420,
+      "expiresAt": "2026-10-17T21:00:00Z",
+      "lastSyncedAt": "2026-10-17T20:58:00Z",
+      "reason": "Fixture only",
+      "habits": [
+        {
+          "id": "a",
+          "name": "Fixture habit",
+          "due": true,
+          "status": "completed",
+          "detail": ""
+        }
+      ],
+      "domains": [
+        "x.com"
+      ]
+    },
+    "allowed": false
+  }
+]

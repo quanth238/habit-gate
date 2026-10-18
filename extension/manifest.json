@@ -1,0 +1,57 @@
+{
+  "manifest_version": 3,
+  "name": "Habit Gate",
+  "version": "1.1.1",
+  "description": "Complete your Habitify essentials before opening your selected websites.",
+  "minimum_chrome_version": "123",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtYbpN9gPi9yadqtyJV2VMNrE5kL/O7Q7Vg/gOPaC5JbSF4YU86eJhNec7GV9e8PLN8q89JdBPGfpjQHtx/ifMAiTiCXmCEOmvlT7hbn2ukBh81azaZclPR5yUlPyWt3gjDa2tmW32v7T+c4GNRBz2fQv3A5g9ENMus6l+WBiqHjQvnxT7wQXKqFy6KGXB9bMBSgraxR4Jo4yriVkA8UpdbeNXTr3nKCxfsYJ5CrySA0EkOheQA2ybYCMU3LOir0bH0Y0Prc1H1vNenD325/oh9E44Z9esgmn3JMovgMC/HY/QcsDQwwCq1Ce+xE2MV1y7hpifuekK5jNZ2K4CWr7/QIDAQAB",
+  "permissions": [
+    "nativeMessaging",
+    "storage",
+    "alarms",
+    "declarativeNetRequest",
+    "scripting"
+  ],
+  "host_permissions": [
+    "*://*.facebook.com/*",
+    "*://*.instagram.com/*",
+    "*://*.x.com/*",
+    "*://*.twitter.com/*",
+    "*://*.fb.com/*"
+  ],
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Habit Gate",
+    "default_popup": "popup.html"
+  },
+  "incognito": "spanning",
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "default_block",
+        "enabled": true,
+        "path": "default-rules.json"
+      }
+    ]
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "blocked.html"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
+  }
+}

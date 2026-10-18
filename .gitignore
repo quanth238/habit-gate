@@ -1,0 +1,24 @@
+.build/
+.swiftpm/
+.DS_Store
+dist/
+*.log
+*.xcuserstate
+
+# Local credentials and signing material
+.env
+.env.*
+!.env.example
+*.p12
+*.pfx
+*.key
+*.pem
+*.mobileprovision
+
+# Per-user runtime state must never be committed.
+configuration.json
+configuration.last-good.json
+configuration.unreadable-*.json
+snapshot.json
+catalog.json
+clients/

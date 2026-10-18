@@ -1,0 +1,111 @@
+{
+  "checkedAt": "2026-10-18T07:30:25.363187+00:00",
+  "nativeVersion": "1.4.0",
+  "nativeBuild": "10",
+  "extensionVersionOnDisk": "1.1.1",
+  "extensionFilesMatchSource": true,
+  "configurationSemanticallyUnchanged": true,
+  "activeHabitCount": 7,
+  "pendingHabitCount": 8,
+  "domainCount": 6,
+  "foregroundAppCount": 5,
+  "recoveryCopyExists": true,
+  "liveSync": {
+    "habitDate": "2026-10-18",
+    "expiresAt": "2026-10-18T21:00:00Z",
+    "lastSyncedAt": "2026-10-18T07:30:21Z",
+    "syncState": "verified",
+    "syncError": null,
+    "access": "blocked"
+  },
+  "freshClients": [
+    {
+      "checkedDomains": [
+        "facebook.com",
+        "fb.com",
+        "instagram.com",
+        "messenger.com",
+        "twitter.com",
+        "x.com"
+      ],
+      "extensionVersion": "1.1.1",
+      "id": "17d41e75-c2f4-4891-af94-d5cd47f5e93e",
+      "label": "Chrome profile 17d41e",
+      "missingDomains": [],
+      "permissionIssue": "",
+      "permissionsOK": true,
+      "privateAccess": false,
+      "rulesOK": true,
+      "seenAt": "2026-10-18T07:30:24Z"
+    }
+  ],
+  "automatedTests": {
+    "swift": 61,
+    "javascript": 20,
+    "total": 81,
+    "passed": true,
+    "nativeLog": "work/ux-native-tests-final.log",
+    "browserLog": "work/ux-browser-tests-final.log"
+  },
+  "installedProtocolChecks": {
+    "passed": true,
+    "command": "python3 scripts/check-install.py",
+    "scope": "signature, origin, framing, size and key-free snapshot contract; separate from live Chrome evidence"
+  },
+  "liveBrowserChecks": [
+    {
+      "url": "https://www.messenger.com/",
+      "expected": "blocked",
+      "observedURL": "chrome-extension://gggclbgihkhajpchlbeakabkoaaelpdb/blocked.html?target=https://www.messenger.com",
+      "title": "Habit Gate · Your essentials first",
+      "passed": true,
+      "evidence": "CUA live tab metadata after reinstall, 18 Oct 2026 14:28 local"
+    },
+    {
+      "url": "https://example.org/",
+      "expected": "usable",
+      "observedURL": "https://example.org/",
+      "title": "Example Domain",
+      "passed": true,
+      "evidence": "CUA live accessibility tree and metadata, 18 Oct 2026 14:28 local"
+    }
+  ],
+  "permissionRepair": {
+    "before": {
+      "version": "1.1.0",
+      "missingDomains": [
+        "messenger.com"
+      ]
+    },
+    "after": {
+      "version": "1.1.1",
+      "missingDomains": [],
+      "permissionsOK": true,
+      "rulesOK": true
+    },
+    "action": "User removed and loaded the canonical unpacked folder again; native policy remained saved."
+  },
+  "secretPatternScan": {
+    "filesChecked": 50,
+    "matchingFiles": [],
+    "pattern": "Habitify key prefix with at least 24 alphanumeric characters",
+    "scope": "Application source, extension assets, resources and app-owned runtime JSON. Keychain and Chrome profile storage not read. This is a pattern check, not a full privacy audit."
+  },
+  "safety": {
+    "habitifyWritesPerformed": false,
+    "liveCredentialDeletionTested": false,
+    "livePolicyCorruptionTested": false,
+    "liveSelectionsEditedForTests": false
+  },
+  "performance": {
+    "currentBuildMeasured": false,
+    "historicalBaseline": "1.2.1; results are not current-build measurements",
+    "targetStatus": "Not established for 1.4.0"
+  },
+  "remainingReleaseGates": [
+    "Apple signing/notarization and production Chrome distribution",
+    "Live completion to unlock to undo, sleep/wake, timezone and existing-tab matrix",
+    "Full keyboard, VoiceOver and contrast audit; independent onboarding pilot",
+    "Fault injection on supported machines for disk-full and permissions; controlled tests already pass"
+  ]
+}

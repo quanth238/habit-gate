@@ -1,0 +1,21 @@
+{
+  "checkedAtUTC": "2026-10-18T04:49:10.732887+00:00",
+  "version": "1.2.0 (5)",
+  "keychainApprovedByUser": true,
+  "lastSuccessfulSyncUTC": "2026-10-18T04:48:26Z",
+  "syncError": null,
+  "access": "blocked",
+  "savedConfigurationUnchanged": true,
+  "selectedHabits": 7,
+  "activeMacApps": 5,
+  "launchAtLoginVisiblyEnabled": true,
+  "liveDiscordBlockVerified": true,
+  "nativeTestsPassed": 28,
+  "browserTestsPassed": 8,
+  "physicalFootprintSampleMB": 39.4,
+  "physicalFootprintPeakMB": 42.6,
+  "notes": [
+    "Physical footprint is a point-in-time sample of the app alone; RSS is measured separately.",
+    "The existing Chrome extension was not reloaded or changed during the native redesign."
+  ]
+}

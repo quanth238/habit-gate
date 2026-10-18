@@ -1,0 +1,15 @@
+{
+  "checkedAtUTC": "2026-10-18T05:09:30.997356+00:00",
+  "version": "1.2.1 (6)",
+  "nativeTestsPassed": 37,
+  "browserTestsPassed": 8,
+  "liveSyncUTC": "2026-10-18T05:09:28Z",
+  "syncError": null,
+  "liveDiscordBlockVerified": true,
+  "configurationUnchanged": true,
+  "launchAtLoginVisiblyEnabled": true,
+  "catalogUnchangedAfterSuccessfulSync": true,
+  "slowAuthorizationVerifiedByControlledTests": true,
+  "physicalFootprintSampleM": 39.1,
+  "physicalFootprintPeakM": 42.8
+}

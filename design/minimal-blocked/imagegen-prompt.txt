@@ -1,0 +1,7 @@
+Use case: ui-mockup
+Asset type: minimal Habit Gate macOS Chrome extension blocked page, one polished flat screenshot concept.
+Primary request: Create an extremely simple full-viewport blocked page inspired by a calm full-screen focus blocker. No dashboard, cards, habit grid, top navigation, sidebar, counters, progress charts or large information panels. Use a solid deep forest green background (#164f44) from edge to edge with pale mint typography (#d5eee3), crisp macOS system sans text.
+Composition: one small vertically centered group with plenty of deliberate empty space. A blue shield-and-check Habit Gate icon around 72px square, then title exactly "Blocked for now." at 42px bold. Underneath a single short sentence exactly "Complete your remaining habits to open Messenger." Beneath that a soft mint filled button with dark green text exactly "Open Habitify" and a quiet text action exactly "Go back". Below, one small subtle disclosure link exactly "View details". No visible habit list, verification status, API jargon, reset times or settings. No browser chrome, no device frame, no gradients, no illustration, no red alarm icon, no scrollbars, no watermark. Engaging through typography, spacing and calm color, not information density. All content fits comfortably within a 1280x640 viewport.
+Keep design realistic and straightforward to implement with local SVG and CSS.
+
+Follow-up requirement: show one short randomly selected local focus quote. The quote stays static while the page is open and has no invented attribution.
