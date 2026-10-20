@@ -2,7 +2,7 @@
 
 A native SwiftUI menu-bar app plus a Chrome Manifest V3 extension. Your selected websites and Mac apps remain gated until all selected daily Habitify habits due on the active habit date are complete. There is no pause or exercise bypass.
 
-**Current alpha: macOS 1.4.0 (10), Chrome extension 1.1.1.** The [current implementation review](docs/UI-UX-REVIEW.md) maps the supplied improvement requirements to changes, screenshots, evidence and remaining release gates. `VALIDATION.md` is a chronological record; its older version sections describe historical builds.
+**Current alpha: macOS 1.4.1 (11), Chrome extension 1.1.1.** The [current implementation review](docs/UI-UX-REVIEW.md) maps the supplied improvement requirements to changes, screenshots, evidence and remaining release gates. `VALIDATION.md` is a chronological record; its older version sections describe historical builds.
 
 ![Midnight Blue blocked-page preview](design/midnight-blue/laptop-1280x640.png)
 
@@ -116,3 +116,9 @@ The blocked page now follows the user's simple focus-blocker reference instead o
 The design was generated with built-in imagegen, then implemented in local HTML/CSS with the existing SVG identity. The quote requirement arrived after the concept; current rendered screenshots include it. Native code, daily rules, background enforcement and Chrome permission declarations are unchanged. Twenty browser tests pass, with visual checks of eight viewport sizes from 640×360 to 1920×940, completion/rest/error/permission/long-list fixtures, Escape dismissal and focus return. See `validation/minimal-blocked-ui.json`. The engineering PDFs predate this presentation follow-up; their policy and reliability review remains applicable, while these screenshots show the current blocked UI.
 
 The user subsequently selected **03 · Midnight Blue**. That direction is now implemented with flat native CSS colors, a compact tonal shield/wordmark, a single periwinkle primary button, an inline Go back / View details row, and a non-italic random quote. The details dialog shares the same navy palette. Eight responsive checks, normal/complete/rest/recovery fixtures, Escape/focus behavior and all 20 browser tests passed again. Calculated text contrast ratios range from 6.11:1 to 13.63:1 for the checked pairs; this is not a full accessibility audit. Current evidence is `validation/midnight-blue-ui.json`. Saved policy and Chrome permission declarations are unchanged.
+
+## Stable blocked-app notice · 1.4.1
+
+A launch can generate several macOS activation/unhide events. The guard now combines in-flight hide requests, ignores stale events for an already hidden app and confirms the hide before showing its notice. An already-visible notice updates without repeated activation. Dismissing it still allows a later genuine blocked-app attempt to show the explanation again. Unlocks and removed targets cancel obsolete hide verification.
+
+Hiding starts immediately, confirmation uses the existing 150 ms delay and bounded retries, and the five-second housekeeping interval is unchanged. No bypass or extra periodic timer was added. Four regression cases reproduced duplicate notices/retries before the fix and pass afterward. All **65 Swift and 20 browser tests** pass; installed signature/protocol checks, live Habitify synchronization and a real Discord interception/dismissal were checked. Rules and launch at login were preserved. No new performance profile was taken. See `validation/notice-stability-update.json`.

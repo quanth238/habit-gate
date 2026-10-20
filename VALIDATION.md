@@ -1,6 +1,6 @@
 # Validation — 18 October 2026
 
-**Current baseline: macOS 1.4.0 (10), Chrome 1.1.1.** This file preserves chronological results; older sections are historical. Current requirement mapping and screenshots: [UI/UX implementation review](docs/UI-UX-REVIEW.md).
+**Current baseline: macOS 1.4.1 (11), Chrome 1.1.1.** This file preserves chronological results; older sections are historical. Current requirement mapping and screenshots: [UI/UX implementation review](docs/UI-UX-REVIEW.md).
 
 ## Delivered
 
@@ -182,3 +182,12 @@ Current evidence: `validation/ux-reliability-update.json`. Public release remain
 - Checked text contrast: main 13.63:1, secondary 7.40:1, primary-button text 9.00:1, details muted text 6.11:1. These are calculated color-pair checks, not full accessibility certification.
 - JavaScript syntax validation and all 20 browser tests pass. Native code, quote selection frequency, background rules, manifest, permissions and saved policy are unchanged. Installed page/style/script files match source byte-for-byte. Existing tabs need Command-R; no extension reinstall is needed.
 - Current screenshots: `design/midnight-blue/`. Current evidence: `validation/midnight-blue-ui.json`. The screenshots are isolated local previews; no live Habitify completion or journal write was performed for this theme change.
+
+## Blocked-app dialog stability · 1.4.1 (11), 20 October 2026
+
+- Reproduced a launch/unhide/activation event burst producing four notice callbacks in the previous code. Additional controlled cases exposed duplicate hide retries, lost foreground-notice intent and obsolete verification after an unlock.
+- The guard now tracks one hide request per selected app, merges foreground intent, ignores stale events for hidden apps and confirms hidden state before presenting the notice. Unlock/removal cancels pending requests; delayed callbacks cannot consume a newer operation. An already-visible notice is not repeatedly ordered forward or activated.
+- The first hide request remains immediate; visibility confirmation uses the existing 150 ms delay, with the existing two bounded retries. No fast polling, new periodic timer, forced termination or policy bypass was added.
+- All **65 Swift tests and 20 browser tests pass (85 total)**. The four new regressions failed against the previous implementation and pass after the fix. Existing guard assertions now wait for asynchronous hide verification where appropriate. Release build, installed signature and native-protocol checks pass.
+- Installed version 1.4.1 (11) resumed real Habitify verification without another credential prompt. Configuration bytes were unchanged, Chrome reported rules ready and native Preferences confirmed launch at login remains on. A real Discord launch was intercepted; Return to work dismissed the notice normally. Live animation/focus-transition counts were not instrumented; exact one-notice callback counts come from controlled tests.
+- No Habitify journal writes, saved-policy edits or current performance profile were performed. Evidence: `validation/notice-stability-update.json`. The engineering PDFs remain historical baselines.

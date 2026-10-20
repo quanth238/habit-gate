@@ -1,0 +1,42 @@
+{
+  "recordedAtUTC": "2026-10-20T00:09:47.854118+00:00",
+  "nativeVersion": "1.4.1",
+  "nativeBuild": "11",
+  "extensionChanged": false,
+  "rootCause": "Launch, unhide and activation events each presented the blocked notice, including stale events for an already hidden app. Concurrent hide requests could also duplicate retries.",
+  "controlledRegression": {
+    "oldNoticeCallbacksForOneBurst": 4,
+    "fixedNoticeCallbacksForOneBurst": 1,
+    "cases": [
+      "event burst coalesces",
+      "pending foreground intent preserved",
+      "stale hidden events stay quiet; later attempt still explains",
+      "unlock cancels obsolete verification"
+    ]
+  },
+  "tests": {
+    "swift": 65,
+    "browser": 20,
+    "total": 85,
+    "passed": true
+  },
+  "releaseBuildPassed": true,
+  "installedSignatureAndProtocolPassed": true,
+  "configurationBytesUnchanged": true,
+  "liveHabitifySyncSuccessful": true,
+  "liveDiscordLaunchIntercepted": true,
+  "noticeDismissedNormally": true,
+  "launchAtLoginVisiblyEnabled": true,
+  "liveAnimationCountMeasured": false,
+  "scope": "Notice callback counts are controlled regression tests; installed UI launch and dismissal were checked through CUA. Real animation/focus transition counts were not instrumented.",
+  "behavior": {
+    "hideStartsImmediately": true,
+    "confirmHideBeforeNoticeMs": 150,
+    "boundedHideRetries": 2,
+    "visibleNoticeIsNotReactivated": true,
+    "additionalPeriodicTimers": false,
+    "habitifyWrites": false,
+    "policyEdits": false,
+    "currentPerformanceProfileTaken": false
+  }
+}

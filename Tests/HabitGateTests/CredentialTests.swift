@@ -43,7 +43,7 @@ private actor ImmediateCredentialStorage: CredentialStorage {
 }
 
 @Suite(.serialized) @MainActor struct CredentialTests {
-    @Test func pendingAuthorizationDoesNotPreventAppGuardWork() async {
+    @Test func pendingAuthorizationDoesNotPreventAppGuardWork() async throws {
         let storage = DeferredCredentialStorage()
         let credentials = CredentialSession(storage: storage)
         let restore = Task { await credentials.load() }
@@ -58,6 +58,7 @@ private actor ImmediateCredentialStorage: CredentialStorage {
         blocker.onBlocked = { _ in explained = true }
         blocker.update(apps: [.init(bundleID: "com.hnc.Discord", name: "Discord")], snapshot: .locked())
         #expect(discord.isHidden)
+        try await Task.sleep(for: .milliseconds(250))
         #expect(explained)
         #expect(credentials.state == .loading)
 

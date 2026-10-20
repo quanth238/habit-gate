@@ -23,7 +23,11 @@ extension NSRunningApplication: GuardedApplication {}
     private var wasBlocking = false
     private var observers: [NSObjectProtocol] = []
     private var issues: [String: String] = [:]
-    private var checking = Set<String>()
+    private final class HideRequest {
+        var notify: Bool
+        init(notify: Bool) { self.notify = notify }
+    }
+    private var checking: [String: HideRequest] = [:]
     init(running: @escaping () -> [any GuardedApplication] = { NSWorkspace.shared.runningApplications },
          frontmost: @escaping () -> (any GuardedApplication)? = { NSWorkspace.shared.frontmostApplication }) {
         self.running = running; self.frontmost = frontmost
@@ -46,56 +50,63 @@ extension NSRunningApplication: GuardedApplication {}
     func update(apps: [BlockedApp], snapshot: GateSnapshot, now: Date = Date(), calendar: Calendar = .current) {
         let changed = self.apps != apps
         self.apps = apps; self.snapshot = snapshot
-        if changed { verified.formIntersection(Set(apps.map(\.id))); onVerified?(verified); issues = issues.filter { key, _ in apps.contains { $0.id == key } }; reportIssues() }
+        if changed {
+            let selected = Set(apps.map(\.id))
+            verified.formIntersection(selected); onVerified?(verified)
+            checking = checking.filter { selected.contains($0.key) }
+            issues = issues.filter { selected.contains($0.key) }; reportIssues()
+        }
         let blocking = !apps.isEmpty && (snapshot.access != "allowed" || !snapshot.valid(at: now, calendar: calendar))
         if blocking && (changed || !wasBlocking) {
             for app in running() { enforce(app, now: now, calendar: calendar) }
         } else if blocking, let app = frontmost() {
             enforce(app, now: now, calendar: calendar)
-        } else if !blocking { issues.removeAll(); reportIssues() }
+        } else if !blocking { checking.removeAll(); issues.removeAll(); reportIssues() }
         wasBlocking = blocking
     }
     func enforce(_ app: any GuardedApplication, showNotice: Bool = false, now: Date = Date(), calendar: Calendar = .current) {
         guard !app.isTerminated,
               AppRules.shouldBlock(bundleID: app.bundleIdentifier, apps: apps, snapshot: snapshot, now: now, calendar: calendar),
               let target = apps.first(where: { $0.id == app.bundleIdentifier?.lowercased() }) else { return }
-        if app.isHidden {
-            if showNotice { onBlocked?(target) }
+        // Queued launch/unhide/activation notifications can describe an app that
+        // has already been hidden. They must not reopen or refocus the notice.
+        guard !app.isHidden else { return }
+        let notify = showNotice || app.isActive
+        if let pending = checking[target.id] {
+            pending.notify = pending.notify || notify
             return
         }
-        let notify = showNotice || app.isActive
-        if app.hide() {
-            verified.insert(target.id); onVerified?(verified)
-            issues.removeValue(forKey: target.id); reportIssues()
-            if notify { onBlocked?(target) }
-        } else {
-            guard checking.insert(target.id).inserted else { return }
-            // RunningApplication caches state for a run-loop turn. Verify after that turn
-            // before treating a concurrent activation/hide request as a real failure.
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
-                self?.verifyHide(app, target: target, notify: notify, attempt: 0)
-            }
+        let request = HideRequest(notify: notify)
+        checking[target.id] = request
+        _ = app.hide()
+        // Even a successful hide can have cached visibility until the next run-loop
+        // turn. Confirm it once before presenting or activating the notice window.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+            self?.verifyHide(app, target: target, request: request, attempt: 0)
         }
     }
-    private func verifyHide(_ app: any GuardedApplication, target: BlockedApp, notify: Bool, attempt: Int) {
+    private func verifyHide(_ app: any GuardedApplication, target: BlockedApp, request: HideRequest, attempt: Int) {
+        // An unlock/removal cancels this request. Its delayed callback cannot
+        // consume or retry a newer hide operation for the same selected app.
+        guard checking[target.id] === request else { return }
         guard !app.isTerminated,
               AppRules.shouldBlock(bundleID: app.bundleIdentifier, apps: apps, snapshot: snapshot) else {
-            checking.remove(target.id); return
+            checking.removeValue(forKey: target.id); return
         }
         if app.isHidden {
             verified.insert(target.id); onVerified?(verified)
-            checking.remove(target.id); issues.removeValue(forKey: target.id)
-            if notify { onBlocked?(target) }
+            checking.removeValue(forKey: target.id); issues.removeValue(forKey: target.id)
+            if request.notify { onBlocked?(target) }
             reportIssues()
         } else if attempt < 2 {
             // Some apps begin activating before they can accept hide requests.
             // Retry twice during that launch transition, then expose a real failure.
             _ = app.hide()
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [weak self] in
-                self?.verifyHide(app, target: target, notify: notify, attempt: attempt + 1)
+                self?.verifyHide(app, target: target, request: request, attempt: attempt + 1)
             }
         } else {
-            checking.remove(target.id)
+            checking.removeValue(forKey: target.id)
             verified.remove(target.id); onVerified?(verified)
             issues[target.id] = "Could not hide \(target.name). Mac app protection needs attention."
             reportIssues()

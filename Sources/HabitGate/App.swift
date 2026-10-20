@@ -75,6 +75,9 @@ import Darwin
         settingsWindow?.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
     }
     private func openBlockedApp() {
+        // The observed store can update an existing notice without activating it
+        // again for another launch/unhide event in the same foreground attempt.
+        guard blockedAppWindow?.isVisible != true else { return }
         popover.performClose(nil)
         if blockedAppWindow == nil {
             let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 520, height: 700),
