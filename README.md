@@ -2,7 +2,7 @@
 
 A native SwiftUI menu-bar app plus a Chrome Manifest V3 extension. Your selected websites and Mac apps remain gated until all selected daily Habitify habits due on the active habit date are complete. There is no pause or exercise bypass.
 
-**Current alpha: macOS 1.4.1 (11), Chrome extension 1.1.1.** The [current implementation review](docs/UI-UX-REVIEW.md) maps the supplied improvement requirements to changes, screenshots, evidence and remaining release gates. `VALIDATION.md` is a chronological record; its older version sections describe historical builds.
+**Current alpha: macOS 1.4.2 (12), Chrome extension 1.1.1.** The [current implementation review](docs/UI-UX-REVIEW.md) maps the supplied improvement requirements to changes, screenshots, evidence and remaining release gates. `VALIDATION.md` is a chronological record; its older version sections describe historical builds.
 
 ![Midnight Blue blocked-page preview](design/midnight-blue/laptop-1280x640.png)
 
@@ -122,3 +122,10 @@ The user subsequently selected **03 · Midnight Blue**. That direction is now im
 A launch can generate several macOS activation/unhide events. The guard now combines in-flight hide requests, ignores stale events for an already hidden app and confirms the hide before showing its notice. An already-visible notice updates without repeated activation. Dismissing it still allows a later genuine blocked-app attempt to show the explanation again. Unlocks and removed targets cancel obsolete hide verification.
 
 Hiding starts immediately, confirmation uses the existing 150 ms delay and bounded retries, and the five-second housekeeping interval is unchanged. No bypass or extra periodic timer was added. Four regression cases reproduced duplicate notices/retries before the fix and pass afterward. All **65 Swift and 20 browser tests** pass; installed signature/protocol checks, live Habitify synchronization and a real Discord interception/dismissal were checked. Rules and launch at login were preserved. No new performance profile was taken. See `validation/notice-stability-update.json`.
+
+
+## Zalo cold-launch notice · 1.4.2
+
+Zalo activates before finishing launch and can bring itself forward several more times as its UI starts. The guard retains the opening attempt, waits for macOS's launch-complete event before hiding, and keeps foreground intent if an activation event arrives during a quiet hide. A single floating notice stays above ordinary startup windows with no opening animation. Existing notices are raised without activating Habit Gate again; **Return to work** dismisses the notice. A later deliberate opening can show a new notice.
+
+A real Zalo cold launch, dismissal, reopen and attempt with a notice already open were checked on the installed build. During the recorded cold-start sequence the same notice kept its window ID and bounds, and Habit Gate activated once. All **67 Swift and 20 browser tests** pass. No additional periodic polling, policy changes, forced app termination or current performance claims were introduced. Zalo's own startup/Dock animations can still occur: this remains a foreground window guard. See `validation/zalo-cold-launch-update.json`.

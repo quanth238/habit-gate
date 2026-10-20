@@ -75,14 +75,21 @@ import Darwin
         settingsWindow?.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
     }
     private func openBlockedApp() {
-        // The observed store can update an existing notice without activating it
-        // again for another launch/unhide event in the same foreground attempt.
-        guard blockedAppWindow?.isVisible != true else { return }
+        // A visible notice can be behind the app that just launched. Raise it
+        // without another activation/focus transition during startup bursts.
+        if let window = blockedAppWindow, window.isVisible {
+            window.orderFrontRegardless()
+            return
+        }
         popover.performClose(nil)
         if blockedAppWindow == nil {
             let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 520, height: 700),
                                   styleMask: [.titled, .closable], backing: .buffered, defer: false)
             window.title = "Habit Gate · Essentials first"; window.isReleasedWhenClosed = false; window.delegate = self
+            window.animationBehavior = .none
+            // Keep one steady explanation above ordinary startup windows, rather
+            // than fighting their repeated activation with more focus requests.
+            window.level = .floating
             window.contentView = NSHostingView(rootView: BlockedMacAppView(store: store, dismiss: { [weak self] in
                 self?.blockedAppWindow?.close()
             }))

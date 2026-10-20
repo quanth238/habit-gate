@@ -6,6 +6,7 @@ import GateCore
     var isHidden: Bool { get }
     var isActive: Bool { get }
     var isTerminated: Bool { get }
+    var isFinishedLaunching: Bool { get }
     @discardableResult func hide() -> Bool
 }
 extension NSRunningApplication: GuardedApplication {}
@@ -25,6 +26,7 @@ extension NSRunningApplication: GuardedApplication {}
     private var issues: [String: String] = [:]
     private final class HideRequest {
         var notify: Bool
+        var started = false
         init(notify: Bool) { self.notify = notify }
     }
     private var checking: [String: HideRequest] = [:]
@@ -38,11 +40,11 @@ extension NSRunningApplication: GuardedApplication {}
                      NSWorkspace.didLaunchApplicationNotification] {
             observers.append(NSWorkspace.shared.notificationCenter.addObserver(forName: name, object: nil, queue: .main) { [weak self] note in
                 guard let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else { return }
-                let isLaunch = note.name == NSWorkspace.didLaunchApplicationNotification
+                // Capture foreground intent before the asynchronous handler: a
+                // successful hide may change isActive before this task runs.
+                let showNotice = note.name != NSWorkspace.didLaunchApplicationNotification || app.isActive
                 Task { @MainActor in
-                    // Launch precedes the first activation on some apps. Let the activation
-                    // event explain a foreground launch instead of hiding it too early.
-                    if !isLaunch || app.isActive { self?.enforce(app, showNotice: true) }
+                    self?.enforce(app, showNotice: showNotice)
                 }
             })
         }
@@ -68,17 +70,24 @@ extension NSRunningApplication: GuardedApplication {}
         guard !app.isTerminated,
               AppRules.shouldBlock(bundleID: app.bundleIdentifier, apps: apps, snapshot: snapshot, now: now, calendar: calendar),
               let target = apps.first(where: { $0.id == app.bundleIdentifier?.lowercased() }) else { return }
-        // Queued launch/unhide/activation notifications can describe an app that
-        // has already been hidden. They must not reopen or refocus the notice.
-        guard !app.isHidden else { return }
         let notify = showNotice || app.isActive
+        let request: HideRequest
         if let pending = checking[target.id] {
             pending.notify = pending.notify || notify
-            return
+            guard !pending.started else { return }
+            request = pending
+        } else {
+            // Ignore stale hidden events after confirmation, but retain genuine
+            // foreground intent delivered while a quiet hide is still pending.
+            guard !app.isHidden else { return }
+            request = HideRequest(notify: notify)
+            checking[target.id] = request
         }
-        let request = HideRequest(notify: notify)
-        checking[target.id] = request
-        _ = app.hide()
+        // Zalo activates before it can reliably accept a hide. Its didLaunch
+        // event resumes this request without polling or spending retries early.
+        guard app.isFinishedLaunching else { return }
+        request.started = true
+        if !app.isHidden { _ = app.hide() }
         // Even a successful hide can have cached visibility until the next run-loop
         // turn. Confirm it once before presenting or activating the notice window.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in

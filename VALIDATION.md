@@ -1,6 +1,6 @@
 # Validation — 18 October 2026
 
-**Current baseline: macOS 1.4.1 (11), Chrome 1.1.1.** This file preserves chronological results; older sections are historical. Current requirement mapping and screenshots: [UI/UX implementation review](docs/UI-UX-REVIEW.md).
+**Current baseline: macOS 1.4.2 (12), Chrome 1.1.1.** This file preserves chronological results; older sections are historical. Current requirement mapping and screenshots: [UI/UX implementation review](docs/UI-UX-REVIEW.md).
 
 ## Delivered
 
@@ -191,3 +191,13 @@ Current evidence: `validation/ux-reliability-update.json`. Public release remain
 - All **65 Swift tests and 20 browser tests pass (85 total)**. The four new regressions failed against the previous implementation and pass after the fix. Existing guard assertions now wait for asynchronous hide verification where appropriate. Release build, installed signature and native-protocol checks pass.
 - Installed version 1.4.1 (11) resumed real Habitify verification without another credential prompt. Configuration bytes were unchanged, Chrome reported rules ready and native Preferences confirmed launch at login remains on. A real Discord launch was intercepted; Return to work dismissed the notice normally. Live animation/focus-transition counts were not instrumented; exact one-notice callback counts come from controlled tests.
 - No Habitify journal writes, saved-policy edits or current performance profile were performed. Evidence: `validation/notice-stability-update.json`. The engineering PDFs remain historical baselines.
+
+
+## Zalo cold-launch correction · 1.4.2 (12), 20 October 2026
+
+- Reproduced the reported cold-launch case with real Zalo 26.8.20, initially not running. Its first activation preceded macOS launch completion by about 0.7 seconds, followed by three further startup unhide/activation bursts. The previous visible-window guard left an existing notice behind other windows.
+- Foreground intent is captured when macOS sends its notification, merged before the pending-hide visibility check, and retained until launch is ready. The launch-complete event resumes hiding; existing bounded hide verification and the five-second housekeeping interval remain in place.
+- The notice disables its opening animation and floats above ordinary startup windows. Raising an existing notice does not reactivate Habit Gate. The floating notice remains in front until the user dismisses it with Return to work or the close button.
+- The final installed build was tested with a real Zalo cold launch. Across the recorded startup bursts the same notice window ID and geometry were retained; Habit Gate activated once for the notice. Return to work dismissed it. Reopening the hidden Zalo showed a new notice, and another attempt with that notice already visible reused it without another Habit Gate activation. Zalo remained alive and hidden after enforcement. This verifies the notice behavior, not suppression of Zalo's own Dock animation or all startup frames.
+- Both new regressions failed on 1.4.1 and pass on the correction. All **67 Swift and 20 browser tests (87 total)** pass. Release compilation and installed signature/native-host protocol checks pass. Saved configuration bytes are unchanged. Real Habitify synchronization resumed after the user approved the updated app's saved-key access in macOS.
+- No Habitify journal writes or performance profile was performed. Diagnostic event metadata remains outside the public source tree. Evidence: `validation/zalo-cold-launch-update.json`. Engineering PDFs remain historical baselines.

@@ -1,0 +1,47 @@
+{
+  "recordedAtUTC": "2026-10-20T00:31:21.351573+00:00",
+  "nativeVersion": "1.4.2",
+  "nativeBuild": "12",
+  "extensionVersion": "1.1.1",
+  "rootCauses": [
+    "Zalo activates before macOS finishes launching it, then unhides itself during startup.",
+    "The visible-window early return could leave a notice behind another app.",
+    "Hidden-state filtering before merging a pending request could drop foreground intent."
+  ],
+  "changes": [
+    "Wait for launch readiness and retain foreground intent.",
+    "Capture foreground intent before asynchronous handling.",
+    "Merge notice intent during an in-flight quiet hide.",
+    "Keep one floating, non-animated notice above ordinary startup windows.",
+    "Raise an existing notice without reactivating Habit Gate."
+  ],
+  "tests": {
+    "swift": 67,
+    "browser": 20,
+    "total": 87,
+    "newRegressionsFailedBeforeFix": 2
+  },
+  "installedChecks": {
+    "signatureAndNativeProtocol": "passed",
+    "configurationUnchanged": true,
+    "realHabitifySyncResumed": true
+  },
+  "realZalo": {
+    "version": "26.8.20",
+    "coldLaunchTested": true,
+    "startupReactivationBurstsObserved": 3,
+    "coldLaunchNoticeWindowIDs": 1,
+    "coldLaunchNoticeGeometries": 1,
+    "coldLaunchNoticeActivations": 1,
+    "dismissalVerified": true,
+    "laterReopenNoticeVerified": true,
+    "visibleNoticeReusedWithoutActivation": true,
+    "processSessionPreserved": true
+  },
+  "limitations": [
+    "Zalo can still perform its own startup and Dock animations; this guard hides foreground windows rather than preventing process execution.",
+    "Window identity and bounds were observed at workspace event boundaries, not every rendered frame.",
+    "No new performance profile; existing polling interval unchanged."
+  ],
+  "privacy": "Raw diagnostic logs and per-user state are kept outside the public repository."
+}

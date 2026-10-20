@@ -8,6 +8,7 @@ import GateCore
     var isHidden = false
     var isActive = false
     var isTerminated = false
+    var isFinishedLaunching = true
     var canHide = true
     var hideCalls = 0
     init(_ id: String, active: Bool = false) { bundleIdentifier = id; isActive = active }
@@ -170,4 +171,35 @@ import GateCore
         #expect(newApp.isHidden); #expect(newApp.hideCalls == 1)
         #expect(notices == 1)
     }
+    @Test func coldLaunchWaitsForReadinessAndKeepsForegroundIntent() async throws {
+        let zalo = FakeGuardedApp("com.vng.zalo", active: true)
+        zalo.isFinishedLaunching = false
+        let target = BlockedApp(bundleID: "com.vng.zalo", name: "Zalo")
+        let blocker = AppBlocker(running: { [] }, frontmost: { nil })
+        var notices = 0; blocker.onBlocked = { _ in notices += 1 }
+        blocker.update(apps: [target], snapshot: .locked())
+        blocker.enforce(zalo, showNotice: true)
+        try await Task.sleep(for: .milliseconds(750))
+        #expect(zalo.hideCalls == 0)
+        #expect(notices == 0)
+        // didLaunch can arrive after the app has already lost foreground focus.
+        zalo.isFinishedLaunching = true; zalo.isActive = false
+        blocker.enforce(zalo)
+        try await Task.sleep(for: .milliseconds(250))
+        #expect(zalo.hideCalls == 1)
+        #expect(notices == 1)
+    }
+    @Test func activationDuringQuietHideStillExplainsTheBlock() async throws {
+        let discord = FakeGuardedApp(target.bundleID)
+        let blocker = AppBlocker(running: { [discord] }, frontmost: { nil })
+        var notices = 0; blocker.onBlocked = { _ in notices += 1 }
+        blocker.update(apps: [target], snapshot: .locked())
+        #expect(discord.isHidden)
+        // macOS can deliver foreground intent after hide has updated visibility.
+        blocker.enforce(discord, showNotice: true)
+        try await Task.sleep(for: .milliseconds(250))
+        #expect(discord.hideCalls == 1)
+        #expect(notices == 1)
+    }
+
 }
