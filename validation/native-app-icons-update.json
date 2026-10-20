@@ -1,0 +1,38 @@
+{
+  "recordedAtUTC": "2026-10-20T00:47:42.794427+00:00",
+  "nativeVersion": "1.4.3",
+  "nativeBuild": "13",
+  "extensionVersion": "1.1.1",
+  "change": "Use installed macOS application icons instead of substitute SF Symbols in the Mac app picker.",
+  "loading": "On row appearance; only the rendered thumbnail is retained by the view. No persistent icon cache, additional timer or network request.",
+  "thumbnail": {
+    "points": [
+      30,
+      30
+    ],
+    "pixels": [
+      60,
+      60
+    ],
+    "measuredBitmapBytes": 14400
+  },
+  "checkedInstalledApps": [
+    "Discord",
+    "NVIDIA GeForce NOW",
+    "Telegram",
+    "WhatsApp",
+    "Zalo"
+  ],
+  "missingAppFallbackVerified": true,
+  "installedUIVisuallyVerified": true,
+  "checks": {
+    "swiftTestsPassed": 67,
+    "releaseBuild": true,
+    "installedSignatureAndNativeProtocol": true,
+    "installedBinaryMatchesSignedDistribution": true,
+    "configurationBytesUnchanged": true,
+    "liveHabitifySync": true
+  },
+  "performance": "No whole-process profile taken. Pixel-buffer size excludes Cocoa overhead, temporary rendering and macOS icon caching.",
+  "privacy": "No third-party icon assets or per-user state added to the public repository."
+}

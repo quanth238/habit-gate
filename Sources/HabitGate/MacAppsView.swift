@@ -112,21 +112,18 @@ struct MacAppsSettingsView: View {
 
 private struct MacAppIcon: View {
     var app: BlockedApp
-    private var symbol: String {
-        switch app.bundleID.lowercased() {
-        case "com.hnc.discord": return "bubble.left.and.bubble.right.fill"
-        case "com.nvidia.gfnpc.mall": return "gamecontroller.fill"
-        case "ru.keepcoder.telegram": return "paperplane.fill"
-        case "net.whatsapp.whatsapp": return "phone.bubble.fill"
-        case "com.vng.zalo": return "bubble.left.fill"
-        default: return "app.fill"
-        }
-    }
+    @AppViewState private var icon: NSImage?
     var body: some View {
-        // System symbols avoid decoding and retaining full-resolution application icons.
-        Image(systemName: symbol).font(.system(size: 16)).foregroundStyle(GateTheme.blue)
-            .frame(width: 30, height: 30).background(GateTheme.blue.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
-            .accessibilityHidden(true)
+        Group {
+            if let icon {
+                Image(nsImage: icon).resizable().interpolation(.high).scaledToFit()
+            } else {
+                Image(systemName: "app.fill").font(.system(size: 16)).foregroundStyle(GateTheme.blue)
+                    .frame(width: 30, height: 30)
+                    .background(GateTheme.blue.opacity(0.08), in: RoundedRectangle(cornerRadius: 8))
+            }
+        }.frame(width: 30, height: 30).accessibilityHidden(true)
+            .onAppear { if icon == nil { icon = MacAppIcons.thumbnail(for: app.bundleID) } }
     }
 }
 

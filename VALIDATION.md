@@ -1,6 +1,6 @@
 # Validation — 18 October 2026
 
-**Current baseline: macOS 1.4.2 (12), Chrome 1.1.1.** This file preserves chronological results; older sections are historical. Current requirement mapping and screenshots: [UI/UX implementation review](docs/UI-UX-REVIEW.md).
+**Current baseline: macOS 1.4.3 (13), Chrome 1.1.1.** This file preserves chronological results; older sections are historical. Current requirement mapping and screenshots: [UI/UX implementation review](docs/UI-UX-REVIEW.md).
 
 ## Delivered
 
@@ -201,3 +201,11 @@ Current evidence: `validation/ux-reliability-update.json`. Public release remain
 - The final installed build was tested with a real Zalo cold launch. Across the recorded startup bursts the same notice window ID and geometry were retained; Habit Gate activated once for the notice. Return to work dismissed it. Reopening the hidden Zalo showed a new notice, and another attempt with that notice already visible reused it without another Habit Gate activation. Zalo remained alive and hidden after enforcement. This verifies the notice behavior, not suppression of Zalo's own Dock animation or all startup frames.
 - Both new regressions failed on 1.4.1 and pass on the correction. All **67 Swift and 20 browser tests (87 total)** pass. Release compilation and installed signature/native-host protocol checks pass. Saved configuration bytes are unchanged. Real Habitify synchronization resumed after the user approved the updated app's saved-key access in macOS.
 - No Habitify journal writes or performance profile was performed. Diagnostic event metadata remains outside the public source tree. Evidence: `validation/zalo-cold-launch-update.json`. Engineering PDFs remain historical baselines.
+
+
+## Installed application icons · 1.4.3 (13), 20 October 2026
+
+- Replaced the Mac app picker's substitute SF Symbols with icons supplied by NSWorkspace for each installed bundle. Images load as rows appear. A missing app keeps a generic fallback, and the picker retains only a 60×60-pixel thumbnail per loaded row. No persistent cache, timer or background icon scan was added.
+- A local smoke check resolved Discord, GeForce NOW, Telegram, WhatsApp and Zalo, confirmed 60×60 pixels and 30×30 points for all five, and checked the unavailable-app fallback. The 14,400-byte thumbnail pixel buffer excludes Cocoa object overhead, temporary rendering and system caching; no whole-process resource profile was taken.
+- Release build, all **67 Swift tests**, installed code signature and native messaging protocol checks pass. The installed Mac apps screen was visually checked and shows authentic app icons. Configuration bytes remain unchanged, and live Habitify synchronization continues without an error. The Chrome extension and enforcement code were unchanged in this patch.
+- Evidence: `validation/native-app-icons-update.json`. Diagnostic thumbnails and raw logs remain outside the public repository; no third-party icon assets are bundled.

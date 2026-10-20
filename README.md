@@ -2,7 +2,7 @@
 
 A native SwiftUI menu-bar app plus a Chrome Manifest V3 extension. Your selected websites and Mac apps remain gated until all selected daily Habitify habits due on the active habit date are complete. There is no pause or exercise bypass.
 
-**Current alpha: macOS 1.4.2 (12), Chrome extension 1.1.1.** The [current implementation review](docs/UI-UX-REVIEW.md) maps the supplied improvement requirements to changes, screenshots, evidence and remaining release gates. `VALIDATION.md` is a chronological record; its older version sections describe historical builds.
+**Current alpha: macOS 1.4.3 (13), Chrome extension 1.1.1.** The [current implementation review](docs/UI-UX-REVIEW.md) maps the supplied improvement requirements to changes, screenshots, evidence and remaining release gates. `VALIDATION.md` is a chronological record; its older version sections describe historical builds.
 
 ![Midnight Blue blocked-page preview](design/midnight-blue/laptop-1280x640.png)
 
@@ -83,7 +83,7 @@ See `VALIDATION.md` for actual build, tests, installation, browser, API, and per
 
 The native app follows the built-in imagegen concept in `design/native-redesign/imagegen-concept.png`. Its exact prompt is saved alongside it as `imagegen-prompt.txt`. The concept uses illustrative progress; the installed app reads live Habitify data.
 
-The Today menu-bar panel, main window, connection setup and blocked-app notice share adaptive light/dark colors, a blue shield identity, numbered habit cards, segmented progress, clearer sync status and consistent actions. The main window has Overview, Essential habits, Websites, Mac apps, Connection and Preferences sections. Protection status appears above the full essentials list so a longer habit selection remains easy to scan. Longer lists scroll, and completed, skipped, failed, rest-day and configuration states have explicit text. System symbols keep the Mac app selector lightweight.
+The Today menu-bar panel, main window, connection setup and blocked-app notice share adaptive light/dark colors, a blue shield identity, numbered habit cards, segmented progress, clearer sync status and consistent actions. The main window has Overview, Essential habits, Websites, Mac apps, Connection and Preferences sections. Protection status appears above the full essentials list so a longer habit selection remains easy to scan. Longer lists scroll, and completed, skipped, failed, rest-day and configuration states have explicit text. The 1.2.0 build used system symbols for the Mac app selector; version 1.4.3 restores the installed macOS icons as small thumbnails.
 
 Open **Preferences** for launch at login and the optional unlock notification. Reopening Habit Gate from Applications opens the main window; closing its windows returns it to menu-bar operation. Policy, API access and browser enforcement remain unchanged. macOS may ask to approve access to the saved Keychain item after installing a locally signed update; complete that prompt on your Mac and never send passwords or keys through chat.
 
@@ -129,3 +129,10 @@ Hiding starts immediately, confirmation uses the existing 150 ms delay and bound
 Zalo activates before finishing launch and can bring itself forward several more times as its UI starts. The guard retains the opening attempt, waits for macOS's launch-complete event before hiding, and keeps foreground intent if an activation event arrives during a quiet hide. A single floating notice stays above ordinary startup windows with no opening animation. Existing notices are raised without activating Habit Gate again; **Return to work** dismisses the notice. A later deliberate opening can show a new notice.
 
 A real Zalo cold launch, dismissal, reopen and attempt with a notice already open were checked on the installed build. During the recorded cold-start sequence the same notice kept its window ID and bounds, and Habit Gate activated once. All **67 Swift and 20 browser tests** pass. No additional periodic polling, policy changes, forced app termination or current performance claims were introduced. Zalo's own startup/Dock animations can still occur: this remains a foreground window guard. See `validation/zalo-cold-launch-update.json`.
+
+
+## Installed Mac app icons · 1.4.3
+
+The Mac app picker now displays the same application icons macOS supplies, including Finder customisation, instead of app-specific substitute symbols. Icons load when each row appears and are rendered into a single 60×60-pixel image for the 30-point row. The view retains that thumbnail, with no persistent icon cache, additional timer or network request. An unavailable application uses a generic app symbol.
+
+The five selected app icons and the missing-app fallback were checked. Each rendered thumbnail has a 14,400-byte pixel buffer; this is a bitmap measurement, not a total-process memory claim. All **67 Swift tests** and installed signature/native-host checks pass, and the installed picker was visually verified. Saved rules are unchanged and live Habitify sync continues. See `validation/native-app-icons-update.json`.
