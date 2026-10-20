@@ -44,6 +44,29 @@ final class MockProtocol: URLProtocol {
         let entries = try await client().journal(date: "2026-10-17")
         #expect(entries.first?.status == "inprogress"); #expect(entries.first?.progress?.current == 12)
     }
+    @Test func refreshedCatalogReplacesDeletedHabitsAndUsesCurrentNamesAndArchiveFlags() async throws {
+        var calls = 0
+        MockProtocol.handler = { request in
+            #expect(request.httpMethod == "GET")
+            #expect(request.cachePolicy == .reloadIgnoringLocalCacheData)
+            calls += 1
+            let entries = calls == 1 ? [("keep", "Old name", false), ("deleted", "Gone", false)] :
+                [("keep", "Renamed", false), ("archived", "Old run", true)]
+            let data = entries.map { id, name, archived in
+                """
+                {"id":"\(id)","name":"\(name)","type":"good","occurrence":{"type":"daily"},"startDate":"2026-01-01","isArchived":\(archived),"goals":[{"periodicity":"daily","isActive":true}]}
+                """
+            }.joined(separator: ",")
+            return (200, [:], Data("{\"data\":[\(data)]}".utf8))
+        }
+        let api = client()
+        let before = try await api.habits()
+        let after = try await api.habits()
+        #expect(before.contains { $0.id == "deleted" })
+        #expect(!after.contains { $0.id == "deleted" })
+        #expect(after.first { $0.id == "keep" }?.name == "Renamed")
+        #expect(after.first { $0.id == "archived" }?.isArchived == true)
+    }
     @Test func authRateLimitAndServerBodiesAreSanitized() async {
         for status in [401, 403, 429, 500] {
             MockProtocol.handler = { _ in (status, ["Retry-After": "90"], Data("private server body test-placeholder-not-a-real-key".utf8)) }

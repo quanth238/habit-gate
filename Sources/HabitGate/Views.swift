@@ -305,7 +305,8 @@ struct SettingsView: View {
         }.buttonStyle(.plain)
     }
     private var habits: some View {
-        VStack(alignment: .leading, spacing: 17) {
+        let rows = HabitCatalog.pickerRows(store.catalog, selected: selection)
+        return VStack(alignment: .leading, spacing: 17) {
             if store.configuration.active != nil { PolicySummaryView(store: store) }
             HStack {
                 GatePill(text: "\(selection.count) in your draft", symbol: "checklist")
@@ -314,22 +315,22 @@ struct SettingsView: View {
             }
             GateCard(padding: 8) {
                 VStack(spacing: 0) {
-                    if store.catalog.isEmpty { Text("Connect Habitify to load your habits.").foregroundStyle(.secondary).padding(20) }
-                    ForEach(store.catalog.sorted {
-                        if selection.contains($0.id) != selection.contains($1.id) { return selection.contains($0.id) }
-                        return $0.name.localizedStandardCompare($1.name) == .orderedAscending
-                    }) { habit in
+                    if rows.isEmpty && selection.isEmpty {
+                        Text(store.catalog.isEmpty ? "Connect Habitify to load your habits." : "No supported daily habits found. Add an active daily habit in Habitify, then refresh.")
+                            .foregroundStyle(.secondary).padding(20)
+                    }
+                    ForEach(rows) { habit in
                         Toggle(isOn: Binding(get: { selection.contains(habit.id) }, set: { enabled in
                             if enabled { selection.insert(habit.id) } else { selection.remove(habit.id) }
                         })) {
                             VStack(alignment: .leading, spacing: 5) {
                                 Text(habit.name).font(.system(size: 13, weight: .medium)).fixedSize(horizontal: false, vertical: true)
-                                Text(habit.supported ? "Daily goal · follows its repeat schedule" : "Requires a good habit with one active daily goal and a supported schedule; weekly/monthly goals and archived habits cannot be used")
+                                Text(HabitCatalog.selectionDetail(habit))
                                     .font(.system(size: 10)).foregroundStyle(.secondary)
                             }.padding(.leading, 5)
                         }.toggleStyle(.checkbox).padding(13).frame(maxWidth: .infinity, alignment: .leading)
                             .disabled(!habit.supported && !selection.contains(habit.id))
-                        if habit.id != store.catalog.last?.id { Divider().overlay(GateTheme.line).padding(.horizontal, 12) }
+                        if habit.id != rows.last?.id { Divider().overlay(GateTheme.line).padding(.horizontal, 12) }
                     }
                     ForEach(Array(selection.subtracting(Set(store.catalog.map(\.id)))).sorted(), id: \.self) { id in
                         Toggle("Missing habit — remove from next day’s rules", isOn: Binding(get: { selection.contains(id) }, set: { if !$0 { selection.remove(id) } }))
@@ -337,6 +338,8 @@ struct SettingsView: View {
                     }
                 }
             }
+            Text("New essentials must have an active daily goal. Archived habits and weekly goals can’t be added.")
+                .font(.system(size: 11)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             GateNotice(text: "Start with 2–4 essentials. Every selected habit due today must be completed in Habitify. Partial, skipped and failed check-ins do not unlock access.", symbol: "checkmark.shield")
             habitTiming
             Button(store.configuration.active == nil ? "Save essentials & choose distractions" : "Save habits for next day") { saveRules(habits: true) }

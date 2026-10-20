@@ -1,0 +1,28 @@
+{
+  "recordedAtUTC": "2026-10-20T01:03:02.641619+00:00",
+  "nativeVersion": "1.4.5",
+  "nativeBuild": "15",
+  "extensionVersion": "1.1.1",
+  "rootCause": "The essential picker displayed every API catalog record, including archived habits and weekly goals unavailable for daily essentials.",
+  "changes": [
+    "Offer supported active daily habits for new selections.",
+    "Retain selected unavailable rows with specific repair explanations.",
+    "Keep missing selected IDs as configuration problems.",
+    "Keep complete API metadata for fail-closed policy evaluation."
+  ],
+  "validation": {
+    "swiftTestsPassed": 70,
+    "newRegressionTests": 3,
+    "releaseBuildPassed": true,
+    "installedSignatureAndNativeProtocolPassed": true,
+    "liveSyncPassed": true,
+    "installedPickerChoices": 8,
+    "completeAPICatalogEntries": 10,
+    "archivedAPICatalogEntries": 1,
+    "configurationBytesUnchanged": true,
+    "zaloStillUnblocked": true,
+    "habitifyWritesPerformed": false
+  },
+  "fixtures": "Deletion, renaming, archive transitions and invalid selected completion were checked with isolated test data; no real habit was changed.",
+  "scope": "No new polling, browser changes or performance profile. Browser tests were not rerun."
+}

@@ -1,6 +1,6 @@
 # Validation — 18 October 2026
 
-**Current baseline: macOS 1.4.4 (14), Chrome 1.1.1.** This file preserves chronological results; older sections are historical. Current requirement mapping and screenshots: [UI/UX implementation review](docs/UI-UX-REVIEW.md).
+**Current baseline: macOS 1.4.5 (15), Chrome 1.1.1.** This file preserves chronological results; older sections are historical. Current requirement mapping and screenshots: [UI/UX implementation review](docs/UI-UX-REVIEW.md).
 
 ## Delivered
 
@@ -216,3 +216,12 @@ Current evidence: `validation/ux-reliability-update.json`. Public release remain
 - The connected Connection screen now displays twelve fixed dots as the SecureField prompt. Its replacement binding remains empty, so the saved secret is not copied into editable UI state and the display cannot enable Verify & save. An empty submit returns immediately. Accessible help identifies the saved-key state.
 - Release build and installed code-signature/native-host checks pass. The installed UI visibly shows the dots and a disabled Verify & save button while Habitify remains connected. No credentials were entered or changed for validation, and no new credential read was added by this display change.
 - Saved configuration bytes match the pre-update backup, including the pending Zalo removal. Live Habitify sync continues without error. Native/browser unit suites were not rerun for this small display-only patch; their preceding recorded results are historical.
+
+
+## Habitify catalog visibility · 1.4.5 (15), 20 October 2026
+
+- Reproduced a successful live refresh that still displayed an archived weekly habit and an active weekly-goal habit as disabled choices. The catalog retains Habitify's archive metadata; the picker had rendered every record without excluding ineligible new choices.
+- The picker now filters new choices using the existing daily-goal eligibility rules. Selected unavailable records stay visible with archive/weekly-specific explanations, and missing selected IDs keep their repair row. Full API metadata still reaches the policy engine. Saved essentials are never silently removed or counted as completed by the picker filter.
+- All **70 Swift tests** pass. New coverage checks deleted IDs, current names and archive flags on successive mocked API reads, plus hidden ineligible new choices and selected unavailable habits that remain blocked even with completed journal fixtures. These fixture transitions do not modify real Habitify data.
+- Release build and installed signature/native-host checks pass. A fresh installed-app sync completed successfully; the picker visibly contains the eight current daily choices and excludes the reported archived/weekly choices. Saved configuration bytes are unchanged, including the prior one-time Zalo exclusion. The complete local catalog still has ten API records, including one archived record, for policy verification.
+- No Habitify writes, additional polling, new performance profile or Chrome change was introduced. Browser tests were not rerun. Evidence: `validation/habit-catalog-update.json`.

@@ -2,7 +2,7 @@
 
 A native SwiftUI menu-bar app plus a Chrome Manifest V3 extension. Your selected websites and Mac apps remain gated until all selected daily Habitify habits due on the active habit date are complete. There is no pause or exercise bypass.
 
-**Current alpha: macOS 1.4.4 (14), Chrome extension 1.1.1.** The [current implementation review](docs/UI-UX-REVIEW.md) maps the supplied improvement requirements to changes, screenshots, evidence and remaining release gates. `VALIDATION.md` is a chronological record; its older version sections describe historical builds.
+**Current alpha: macOS 1.4.5 (15), Chrome extension 1.1.1.** The [current implementation review](docs/UI-UX-REVIEW.md) maps the supplied improvement requirements to changes, screenshots, evidence and remaining release gates. `VALIDATION.md` is a chronological record; its older version sections describe historical builds.
 
 ![Midnight Blue blocked-page preview](design/midnight-blue/laptop-1280x640.png)
 
@@ -143,3 +143,10 @@ The five selected app icons and the missing-app fallback were checked. Each rend
 Connection settings show a fixed row of masked dots in the empty API-key field when a key is connected. The dots are presentation only: the saved credential is not copied into the field, and Verify & save stays disabled until a replacement is entered. Accessible help explains that a key is already saved. Empty Return submissions leave the connection alone.
 
 The installed screen, disabled button, release build and installed signature/native-host checks were verified. Live sync continues, and saved policy—including pending removals—is unchanged. This is a UI-only patch; the native/browser test suites were not rerun for this display change.
+
+
+## Habitify catalog visibility · 1.4.5
+
+Habitify's catalog includes archived habits. The essential-habit picker now offers active habits with supported daily goals, rather than displaying every API record. Already-selected unavailable habits remain visible with a specific explanation so selections can be repaired; missing selected IDs still appear as configuration problems. The complete API catalog remains available to the policy engine, and filtering never counts a missing or archived habit as complete.
+
+A fresh live sync and the installed eight-row daily picker were verified. All **70 Swift tests** pass, including refreshed API results with deletion/rename/archive changes and unavailable selections that must remain blocked. Existing rules are unchanged. The Chrome extension was unchanged and its tests were not rerun. See `validation/habit-catalog-update.json`.
