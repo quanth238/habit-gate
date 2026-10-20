@@ -1,6 +1,6 @@
 # Validation — 18 October 2026
 
-**Current baseline: macOS 1.4.3 (13), Chrome 1.1.1.** This file preserves chronological results; older sections are historical. Current requirement mapping and screenshots: [UI/UX implementation review](docs/UI-UX-REVIEW.md).
+**Current baseline: macOS 1.4.4 (14), Chrome 1.1.1.** This file preserves chronological results; older sections are historical. Current requirement mapping and screenshots: [UI/UX implementation review](docs/UI-UX-REVIEW.md).
 
 ## Delivered
 
@@ -209,3 +209,10 @@ Current evidence: `validation/ux-reliability-update.json`. Public release remain
 - A local smoke check resolved Discord, GeForce NOW, Telegram, WhatsApp and Zalo, confirmed 60×60 pixels and 30×30 points for all five, and checked the unavailable-app fallback. The 14,400-byte thumbnail pixel buffer excludes Cocoa object overhead, temporary rendering and system caching; no whole-process resource profile was taken.
 - Release build, all **67 Swift tests**, installed code signature and native messaging protocol checks pass. The installed Mac apps screen was visually checked and shows authentic app icons. Configuration bytes remain unchanged, and live Habitify synchronization continues without an error. The Chrome extension and enforcement code were unchanged in this patch.
 - Evidence: `validation/native-app-icons-update.json`. Diagnostic thumbnails and raw logs remain outside the public repository; no third-party icon assets are bundled.
+
+
+## Saved API-key display · 1.4.4 (14), 20 October 2026
+
+- The connected Connection screen now displays twelve fixed dots as the SecureField prompt. Its replacement binding remains empty, so the saved secret is not copied into editable UI state and the display cannot enable Verify & save. An empty submit returns immediately. Accessible help identifies the saved-key state.
+- Release build and installed code-signature/native-host checks pass. The installed UI visibly shows the dots and a disabled Verify & save button while Habitify remains connected. No credentials were entered or changed for validation, and no new credential read was added by this display change.
+- Saved configuration bytes match the pre-update backup, including the pending Zalo removal. Live Habitify sync continues without error. Native/browser unit suites were not rerun for this small display-only patch; their preceding recorded results are historical.

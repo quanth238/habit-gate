@@ -401,8 +401,11 @@ struct SettingsView: View {
                     Divider().overlay(GateTheme.line)
                     VStack(alignment: .leading, spacing: 8) {
                         Text(store.hasKey ? "Replace API key" : "Habitify API key").font(.system(size: 12, weight: .medium))
-                        SecureField(store.hasKey ? "Enter a replacement key" : "Paste your API key here", text: $apiKey)
+                        SecureField("Habitify API key", text: $apiKey,
+                                    prompt: Text(store.hasKey ? "••••••••••••" : "Paste your API key here"))
                             .textFieldStyle(.roundedBorder).controlSize(.large).onSubmit { connect() }
+                            .help(store.hasKey ? "A key is saved in Keychain. Type a new key only to replace it." : "Paste your Habitify API key here.")
+                            .accessibilityHint(store.hasKey ? "API key already saved. Enter a new key only to replace it." : "Enter your Habitify API key.")
                         Text("On your phone: Habitify → Settings → API Credentials. A paid plan is required. Generating a new key revokes the previous one.")
                             .font(.system(size: 11)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                     }
@@ -544,6 +547,7 @@ struct SettingsView: View {
         } catch { localError = error.localizedDescription }
     }
     private func connect() {
+        guard !apiKey.isEmpty else { return }
         Task { if await store.connect(apiKey) { apiKey = ""; localError = ""; if store.configuration.active == nil { page = .habits } } }
     }
 }

@@ -2,7 +2,7 @@
 
 A native SwiftUI menu-bar app plus a Chrome Manifest V3 extension. Your selected websites and Mac apps remain gated until all selected daily Habitify habits due on the active habit date are complete. There is no pause or exercise bypass.
 
-**Current alpha: macOS 1.4.3 (13), Chrome extension 1.1.1.** The [current implementation review](docs/UI-UX-REVIEW.md) maps the supplied improvement requirements to changes, screenshots, evidence and remaining release gates. `VALIDATION.md` is a chronological record; its older version sections describe historical builds.
+**Current alpha: macOS 1.4.4 (14), Chrome extension 1.1.1.** The [current implementation review](docs/UI-UX-REVIEW.md) maps the supplied improvement requirements to changes, screenshots, evidence and remaining release gates. `VALIDATION.md` is a chronological record; its older version sections describe historical builds.
 
 ![Midnight Blue blocked-page preview](design/midnight-blue/laptop-1280x640.png)
 
@@ -136,3 +136,10 @@ A real Zalo cold launch, dismissal, reopen and attempt with a notice already ope
 The Mac app picker now displays the same application icons macOS supplies, including Finder customisation, instead of app-specific substitute symbols. Icons load when each row appears and are rendered into a single 60×60-pixel image for the 30-point row. The view retains that thumbnail, with no persistent icon cache, additional timer or network request. An unavailable application uses a generic app symbol.
 
 The five selected app icons and the missing-app fallback were checked. Each rendered thumbnail has a 14,400-byte pixel buffer; this is a bitmap measurement, not a total-process memory claim. All **67 Swift tests** and installed signature/native-host checks pass, and the installed picker was visually verified. Saved rules are unchanged and live Habitify sync continues. See `validation/native-app-icons-update.json`.
+
+
+## Saved-key indication · 1.4.4
+
+Connection settings show a fixed row of masked dots in the empty API-key field when a key is connected. The dots are presentation only: the saved credential is not copied into the field, and Verify & save stays disabled until a replacement is entered. Accessible help explains that a key is already saved. Empty Return submissions leave the connection alone.
+
+The installed screen, disabled button, release build and installed signature/native-host checks were verified. Live sync continues, and saved policy—including pending removals—is unchanged. This is a UI-only patch; the native/browser test suites were not rerun for this display change.
