@@ -29,6 +29,7 @@ import UniformTypeIdentifiers
     let root: URL
     var showToday: (() -> Void)?
     var showSettings: (() -> Void)?
+    var toggleFullScreen: (() -> Void)?
     var statusChanged: (() -> Void)?
     var showBlockedApp: (() -> Void)?
     private let appBlocker = AppBlocker()

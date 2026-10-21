@@ -172,3 +172,10 @@ See [the current flow, specification and screenshots](docs/DAILY-ACCESS.md) and 
 A new built-in imagegen concept guides the Temporary access page: an open canvas, a thin clock dial, tabular digits, one compact action and a quiet strip for app icons, reset time and coverage. The header holds the daily limit, and flexible vertical space keeps the composition balanced in taller windows. Ready, running, one-minute warning and exhausted states fit the 880 × 680 minimum; light and dark appearance use the existing native palette. The sidebar and timer footer are quieter, and the app strip handles longer selections without overflowing.
 
 The native implementation uses SwiftUI shapes and text. Daily counting, app enforcement and Chrome 1.1.1 are unchanged; all 91 Swift tests pass. See the [generated concept, exact prompt and rendered screenshots](design/temporary-access/refined/README.md) and [validation evidence](validation/refined-access-1.5.3.json).
+
+
+## Balanced full-screen layout · 1.5.4
+
+The Temporary access page now uses its available width, supports the native green full-screen button and offers a header action with Control-Command-F. The main window remembers its frame and initially fills the screen's visible area. The clock stays between 220 and 340 points; timer digits, action, caption, app icons and reset metadata form one centered group with balanced space above and below. Large windows retain readable proportions. Login still starts quietly in the menu bar.
+
+All 91 Swift tests pass. Daily accounting, enforcement, Chrome 1.1.1 and permanent policy are unchanged. See [screenshots and layout notes](design/temporary-access/responsive/README.md) and [validation](validation/responsive-access-1.5.4.json).

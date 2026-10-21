@@ -6,8 +6,9 @@ private typealias AccessState<Value> = SwiftUI.State<Value>
 struct TemporaryAccessView: View {
     @ObservedObject var store: GateStore
     @ObservedObject var access: DailyAccessController
+    var availableSize: CGSize
     var body: some View {
-        DailyAccessCard(store: store, access: access)
+        DailyAccessCard(store: store, access: access, availableSize: availableSize)
             .onDisappear { store.pendingAccessApp = nil }
     }
 }
@@ -68,6 +69,10 @@ struct DailyAccessCard: View {
     @ObservedObject var store: GateStore
     @ObservedObject var access: DailyAccessController
     var compact = false
+    var availableSize = CGSize(width: 600, height: 440)
+    private var dialDiameter: CGFloat { max(220, min(340, availableSize.width * 0.58, availableSize.height - 240)) }
+    private var dialScale: CGFloat { dialDiameter / 232 }
+    private var labelSize: CGFloat { min(13, max(11, 11 * dialScale)) }
     private var apps: [BlockedApp] { store.configuration.active?.apps ?? [] }
     private var state: String {
         if store.normalAccess { return "Apps unlocked" }
@@ -86,16 +91,14 @@ struct DailyAccessCard: View {
         if compact { compactCard }
         else {
             VStack(spacing: 0) {
-                Spacer(minLength: 0)
                 liveCountdown
-                action.frame(width: 200).padding(.top, 22)
-                Text(caption).font(.system(size: 11)).foregroundStyle(.secondary)
+                action.frame(width: min(240, max(200, dialDiameter * 0.7))).padding(.top, 22)
+                Text(caption).font(.system(size: min(14, labelSize))).foregroundStyle(.secondary)
                     .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true).padding(.top, 12)
                 warning.padding(.top, 10)
-                Spacer(minLength: 24)
-                appStrip
+                appStrip.padding(.top, 24)
                 storageProblem.padding(.top, access.issue.isEmpty ? 0 : 12)
-            }.frame(maxWidth: .infinity)
+            }.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         }
     }
     private var compactCard: some View {
@@ -137,12 +140,13 @@ struct DailyAccessCard: View {
             }
         } else {
             let fraction = min(1, max(0, access.remaining / access.budget.totalSeconds))
+            let radius = dialDiameter / 2
             ZStack {
                 Circle().stroke(GateTheme.line, lineWidth: 3).accessibilityHidden(true)
                 ForEach(0..<12, id: \.self) { tick in
                     Capsule().fill(GateTheme.secondary.opacity(0.5))
-                        .frame(width: 1, height: tick % 3 == 0 ? 7 : 4)
-                        .offset(y: -102).rotationEffect(.degrees(Double(tick) * 30))
+                        .frame(width: 1, height: (tick % 3 == 0 ? 7 : 4) * min(1.5, dialScale))
+                        .offset(y: -(radius - 14 * min(1.5, dialScale))).rotationEffect(.degrees(Double(tick) * 30))
                         .accessibilityHidden(true)
                 }
                 if access.isCounting {
@@ -150,33 +154,35 @@ struct DailyAccessCard: View {
                         .stroke(GateTheme.blue, style: StrokeStyle(lineWidth: 4, lineCap: .round))
                         .rotationEffect(.degrees(-90)).accessibilityHidden(true)
                     Circle().fill(GateTheme.blue).frame(width: 6, height: 6)
-                        .offset(y: -116).rotationEffect(.degrees(fraction * 360)).accessibilityHidden(true)
+                        .offset(y: -radius).rotationEffect(.degrees(fraction * 360)).accessibilityHidden(true)
                 }
                 if access.remaining > 0 {
-                    Circle().fill(GateTheme.blue).frame(width: 6, height: 6).offset(y: -116).accessibilityHidden(true)
+                    Circle().fill(GateTheme.blue).frame(width: 6, height: 6).offset(y: -radius).accessibilityHidden(true)
                 }
-                VStack(spacing: 9) {
-                    Text(state).font(.system(size: 11, weight: .medium))
+                VStack(spacing: 9 * min(1.6, dialScale)) {
+                    Text(state).font(.system(size: labelSize, weight: .medium))
                         .foregroundStyle(access.isCounting ? GateTheme.blue : GateTheme.secondary)
-                    Text(digits).font(.system(size: 58, weight: .medium)).monospacedDigit().tracking(-2)
+                    Text(digits).font(.system(size: dialDiameter * 0.23, weight: .medium)).monospacedDigit().tracking(-2)
                         .accessibilityLabel("\(seconds / 60) minutes \(seconds % 60) seconds left today")
-                    Text("remaining today").font(.system(size: 11)).foregroundStyle(.secondary)
+                    Text("remaining today").font(.system(size: labelSize)).foregroundStyle(.secondary)
                     if access.isCounting {
                         Text("Ends at \(min(access.budget.resetsAt, Date().addingTimeInterval(access.remaining)).formatted(date: .omitted, time: .shortened))")
-                            .font(.system(size: 10)).foregroundStyle(.secondary)
+                            .font(.system(size: max(10, labelSize - 1))).foregroundStyle(.secondary)
                     }
                 }
-            }.frame(width: 232, height: 232).padding(4)
+            }.frame(width: dialDiameter, height: dialDiameter).padding(4)
         }
     }
     @ViewBuilder private var action: some View {
         if access.accessStarted {
             Button { access.endAccess() } label: {
-                Label("End access", systemImage: "stop.fill").frame(maxWidth: .infinity)
+                Label("End access", systemImage: "stop.fill")
+                    .font(.system(size: compact ? 12 : 14, weight: .semibold)).frame(maxWidth: .infinity)
             }.buttonStyle(GateButtonStyle(primary: true))
         } else {
             Button { store.startDailyAccess() } label: {
-                Label("Start access", systemImage: "play.fill").frame(maxWidth: .infinity)
+                Label("Start access", systemImage: "play.fill")
+                    .font(.system(size: compact ? 12 : 14, weight: .semibold)).frame(maxWidth: .infinity)
             }.buttonStyle(GateButtonStyle(primary: true))
                 .disabled(!access.canStart || store.normalAccess || store.needsRecovery)
         }
@@ -185,7 +191,6 @@ struct DailyAccessCard: View {
         VStack(spacing: 13) {
             Rectangle().fill(GateTheme.line).frame(height: 1)
             HStack(spacing: 9) {
-                Text("For blocked apps").font(.system(size: 11)).foregroundStyle(.secondary)
                 ForEach(Array(apps.prefix(5))) { app in
                     MacAppIcon(app: app).help(app.name).accessibilityHidden(false).accessibilityLabel(app.name)
                 }
@@ -193,18 +198,16 @@ struct DailyAccessCard: View {
                     Text("+\(apps.count - 5)").font(.system(size: 11, weight: .medium))
                         .foregroundStyle(.secondary).accessibilityLabel("\(apps.count - 5) more blocked apps")
                 }
-                Spacer(minLength: 8)
-                Button { store.requestTemporaryAccess(settings: true) } label: { Image(systemName: "gearshape") }
-                    .buttonStyle(.plain).foregroundStyle(.secondary).help("Daily allowance settings")
-                    .accessibilityLabel("Daily allowance settings")
-            }
+            }.frame(maxWidth: .infinity).accessibilityElement(children: .contain).accessibilityLabel("Included blocked apps")
             HStack(spacing: 6) {
                 Text("Resets at \(access.budget.resetsAt.formatted(date: .omitted, time: .shortened))")
                 Text("·").accessibilityHidden(true)
                 Label("Websites stay protected", systemImage: "lock.shield")
-                Spacer(minLength: 0)
+                Button { store.requestTemporaryAccess(settings: true) } label: { Image(systemName: "gearshape") }
+                    .buttonStyle(.plain).foregroundStyle(.secondary).help("Daily allowance settings")
+                    .accessibilityLabel("Daily allowance settings")
             }.font(.system(size: 10)).foregroundStyle(.secondary)
-        }.frame(maxWidth: 500)
+        }.frame(width: min(availableSize.width, 440))
     }
     @ViewBuilder private var warning: some View {
         if access.remaining > 0 && access.remaining <= 60 {

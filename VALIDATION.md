@@ -261,3 +261,10 @@ See [the specification and flow](docs/DAILY-ACCESS.md) and [recorded evidence](v
 The timer presentation follows a new built-in imagegen concept. The enclosing card and full-width action were replaced by an open canvas, thin dial, compact action and separate app strip. Ready, active, warning and exhausted layouts were rendered at 880 × 680, with light and dark checks. Flexible spacing also balances the installed taller window. Numeric balance and state labels remain explicit; no animation, background polling, generated-image runtime asset or additional network request was added.
 
 91 Swift tests pass and the release builds. The countdown controller, native enforcement and browser implementation are unchanged. Installation preserves used time, the daily limit and permanent configuration. A fresh installed Habitify sync passed after a transient server failure retried automatically. A fresh resource benchmark and full VoiceOver audit were not performed. Evidence and installed connection status are in [validation/refined-access-1.5.3.json](validation/refined-access-1.5.3.json).
+
+
+## Balanced window and full-screen behavior · 1.5.4 (20)
+
+The layout removes the Temporary access width cap, bounds the dial to 220–340 points and centers the timer, primary action, caption, icons and metadata as one group. The main window explicitly supports full screen/tiling, remembers its frame and initially fills the visible screen area. The header action targets the owning window through the app delegate. Native green-button entry, header entry/exit and keyboard entry were checked in an isolated native fixture.
+
+All 91 Swift tests pass and the release build succeeds. Daily accounting and enforcement are unchanged. Installed identity, preserved settings, installed full-screen state and layout screenshots are recorded in [validation/responsive-access-1.5.4.json](validation/responsive-access-1.5.4.json). No new resource benchmark or full VoiceOver audit was performed.

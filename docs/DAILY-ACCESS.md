@@ -1,4 +1,4 @@
-# Daily app access — native 1.5.3
+# Daily app access — native 1.5.4
 
 Choose **Start access** when you need a blocked Mac app and **End access** when finished. All configured blocked apps share **15 minutes per habit day** by default. Starting again uses the time left; it never creates another 15 minutes.
 
@@ -20,6 +20,7 @@ The main Temporary access page opens with a circular countdown, the remaining ba
 | DA-10 | Restart and recovery | Restart with access off and retain used time. Configuration problems or a detected clock rollback revoke access. Habitify network failure alone does not consume or remove the local balance. |
 | DA-11 | Browser isolation | No change to GateSnapshot, Chrome messages, browser permissions, Habitify requests or permanent app selections. Websites receive no temporary grant. |
 | DA-12 | Shortcuts | Today has the same Start/End action. A blocked-app shortcut opens the countdown; successful Start opens only the originally requested app once. |
+| DA-13 | Window layout | Temporary access offers full screen through its header action, Control-Command-F and the native green button. The clock is bounded to 220–340 points; its action, icons and metadata share the same center axis. The window remembers its frame. |
 
 Calls and uploads may continue in the background after End or exhaustion. This is voluntary foreground-window protection, not process termination or background network blocking.
 
@@ -74,7 +75,7 @@ The saved reset deadline stays fixed during a timezone change. At that deadline,
 
 ## Interface and accessibility
 
-The app opens its countdown page after setup. The 1.5.3 interface uses an open canvas, a thin clock dial with subtle ticks, tabular timer digits and one compact Start or End action. Ready, Access on and Time used today labels accompany the visual state. A header chip shows the daily limit; the lower app strip shows real icons, reset time, website coverage and a settings shortcut. Settings retains allowance editing above login and notification preferences. Vertical space adapts to taller windows; the minimum 880 × 680 layout keeps the essential controls visible without scrolling.
+The app opens its countdown page after setup. The interface uses an open canvas, a thin clock dial with subtle ticks, tabular timer digits and one compact Start or End action. Ready, Access on and Time used today labels accompany the visual state. A header chip shows the daily limit; centered app icons and metadata show coverage, reset time and the settings shortcut. Settings retains allowance editing above login and notification preferences. The 1.5.4 layout centers the entire interaction group with balanced surrounding space and bounds the clock to 220–340 points. Minimum 880 × 680 and full-screen layouts keep the controls at readable proportions. The main window remembers its frame and initially fills the screen's visible area; login startup remains quiet.
 
 The Today panel keeps a compact timer and the same action. The blocked-app notice links to the countdown. Blue actions, adaptive light/dark surfaces, system fonts and explicit text labels follow the existing native design. Settings retain Command-S saving and explicit custom-input labels. The ring updates without flashing or animation. Its numeric balance is available to accessibility tools, and all actions are native keyboard-accessible buttons. The design keeps Settings separate from daily Start/End use.
 
@@ -88,15 +89,15 @@ Installed-app and screenshot evidence: `validation/continuous-access-1.5.2.json`
 
 ### Current interface
 
-![Refined countdown](../design/temporary-access/refined/installed-ready.png)
+![Installed full-screen countdown](../design/temporary-access/responsive/installed-fullscreen.jpg)
 
-![Running countdown — illustrative isolated preview](../design/temporary-access/refined/preview-active-880x680.png)
+![Running countdown — illustrative isolated preview](../design/temporary-access/responsive/preview-active.jpg)
 
-The 1.5.3 redesign follows a [new generated concept, with the exact prompt and light/dark/state previews](../design/temporary-access/refined/README.md). All 91 Swift tests passed for this presentation update. The countdown controller, enforcement and browser code are unchanged; see `validation/refined-access-1.5.3.json` for UI/build/install evidence. Generated concept data and isolated preview balances are illustrative. The 1.5.2 section above remains the behavioral acceptance record.
+The redesign follows a [generated concept and exact prompt](../design/temporary-access/refined/README.md). Version 1.5.4 corrects [full-screen support, proportion and alignment](../design/temporary-access/responsive/README.md). All 91 Swift tests passed. The countdown controller, enforcement and browser code are unchanged; see `validation/responsive-access-1.5.4.json` for evidence. Generated data and isolated preview balances are illustrative. The 1.5.2 section above remains the behavioral acceptance record.
 
 ### Performance limits
 
-The earlier 1.5.0 warm closed-window sample measured **0.673% CPU and 108.16 MB mean RSS**, exceeding the original <0.5% / <100 MB targets. See `validation/daily-access-1.5.0.json` for sample conditions and earlier results. The 1.5.2–1.5.3 flow/layout updates have not been benchmarked separately; no performance improvement is claimed.
+The earlier 1.5.0 warm closed-window sample measured **0.673% CPU and 108.16 MB mean RSS**, exceeding the original <0.5% / <100 MB targets. See `validation/daily-access-1.5.0.json` for sample conditions and earlier results. The 1.5.2–1.5.4 flow/layout updates have not been benchmarked separately; no performance improvement is claimed.
 
 ## Rollback
 

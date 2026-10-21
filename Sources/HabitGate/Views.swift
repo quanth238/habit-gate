@@ -184,10 +184,20 @@ struct SettingsView: View {
                                 if page == .temporary {
                                     Spacer(minLength: 12)
                                     GatePill(text: "\(store.temporaryAccess.budget.todayMinutes) min daily", symbol: "clock")
+                                    Button { store.toggleFullScreen?() } label: {
+                                        Image(systemName: "arrow.up.left.and.arrow.down.right")
+                                            .font(.system(size: 13)).padding(6)
+                                    }.buttonStyle(.plain).foregroundStyle(.secondary)
+                                        .disabled(store.toggleFullScreen == nil)
+                                        .help("Toggle full screen (⌃⌘F)").accessibilityLabel("Toggle full screen")
+                                        .keyboardShortcut("f", modifiers: [.control, .command])
                                 }
                             }
                             switch page {
-                            case .temporary: TemporaryAccessView(store: store, access: store.temporaryAccess).frame(maxHeight: .infinity)
+                            case .temporary:
+                                TemporaryAccessView(store: store, access: store.temporaryAccess,
+                                    availableSize: CGSize(width: max(0, viewport.size.width - 48), height: max(0, viewport.size.height - 128)))
+                                    .frame(maxHeight: .infinity)
                             case .review: activationReview
                             case .overview: overview
                             case .habits: habits
@@ -197,13 +207,15 @@ struct SettingsView: View {
                             case .preferences: preferences
                             }
                             if !localError.isEmpty { GateNotice(text: localError, symbol: "exclamationmark.circle", warning: true) }
-                        }.padding(page == .temporary ? 24 : 30).frame(maxWidth: 850, alignment: .leading).frame(maxWidth: .infinity)
+                        }.padding(page == .temporary ? 24 : 30)
+                            .frame(maxWidth: page == .temporary ? .infinity : 850, alignment: .leading).frame(maxWidth: .infinity)
                             .frame(minHeight: page == .temporary ? viewport.size.height : 0, alignment: .top)
                     }
                 }
                 footer
             }.background(GateTheme.canvas)
-        }.tint(GateTheme.blue).frame(minWidth: 880, idealWidth: 980, minHeight: 648, idealHeight: 748)
+        }.background(GateTheme.canvas.ignoresSafeArea())
+            .tint(GateTheme.blue).frame(minWidth: 880, idealWidth: 980, minHeight: 648, idealHeight: 748)
              .onAppear {
                  loadDraft()
                  if store.temporaryAccessRequest != nil { page = store.temporaryAccessOpensSettings ? .preferences : .temporary; store.temporaryAccessRequest = nil }

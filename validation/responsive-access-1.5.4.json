@@ -1,0 +1,87 @@
+{
+  "date": "2026-10-21",
+  "nativeVersion": "1.5.4",
+  "nativeBuild": 20,
+  "chromeVersion": "1.1.1",
+  "scope": "Window behavior and presentation; daily accounting and enforcement remain unchanged.",
+  "layout": {
+    "clockDiameterPoints": [
+      220,
+      340
+    ],
+    "oneCenteredInteractionGroup": true,
+    "centeredIconRow": true,
+    "minimumWindowPoints": [
+      880,
+      680
+    ],
+    "temporaryPageUsesAvailableWidth": true,
+    "initialWindowFillsVisibleScreen": true,
+    "nativeFrameAutosave": true,
+    "fullScreenActions": [
+      "Native green button",
+      "Temporary access header button",
+      "Control-Command-F"
+    ]
+  },
+  "checks": {
+    "swiftTestsPassed": 91,
+    "releaseBuildPassed": true,
+    "nativeGreenButtonEntryVerifiedInFixture": true,
+    "headerFullScreenEntryAndExitVerifiedInFixture": true,
+    "keyboardFullScreenEntryVerifiedInFixture": true,
+    "installedFullScreenEntryVerified": true,
+    "installedSignatureAndNativeHostPassed": true,
+    "installedMatchesSignedDist": true,
+    "permanentConfigurationPreserved": true,
+    "usedSecondsPreserved": true,
+    "dailyLimitPreserved": true,
+    "temporaryAccessIsOff": true,
+    "ledgerMode": "0o600",
+    "keychainApproval": "Approved by the user; app credential access restored.",
+    "geforceRemainsExcluded": true,
+    "nativeFrameAutosaveWritten": true
+  },
+  "visualChecks": [
+    "Minimum-size ready, light, active and warning fixtures retain all controls without scrolling.",
+    "1920-wide window uses a bounded centered group.",
+    "Installed full-screen screenshot shows common horizontal center for clock, action, icons and metadata.",
+    "True full screen removes native window frame controls; the header action remains available."
+  ],
+  "installedSync": {
+    "state": "failed",
+    "error": "Cannot reach Habitify. Retrying automatically; only verified completion remains valid until 4 AM.",
+    "note": "The app was already reporting a Habitify network failure before this UI update. Automatic retries remain enabled. No fresh-sync success is claimed."
+  },
+  "screenshots": {
+    "design/temporary-access/responsive/installed-fullscreen.jpg": [
+      1920,
+      1200
+    ],
+    "design/temporary-access/responsive/preview-active.jpg": [
+      880,
+      680
+    ],
+    "design/temporary-access/responsive/preview-large.jpg": [
+      1920,
+      1048
+    ],
+    "design/temporary-access/responsive/preview-light.jpg": [
+      880,
+      680
+    ],
+    "design/temporary-access/responsive/preview-minimum.jpg": [
+      880,
+      680
+    ],
+    "design/temporary-access/responsive/preview-warning.jpg": [
+      880,
+      680
+    ]
+  },
+  "limitations": [
+    "No new CPU or memory benchmark.",
+    "No full VoiceOver audit.",
+    "Browser tests were not rerun: browser implementation and messages are unchanged."
+  ]
+}

@@ -40,6 +40,7 @@ import Darwin
         popover.behavior = .transient; popover.delegate = self
         store.showToday = { [weak self] in self?.settingsWindow?.close(); self?.togglePopover() }
         store.showSettings = { [weak self] in self?.openSettings() }
+        store.toggleFullScreen = { [weak self] in self?.settingsWindow?.toggleFullScreen(nil) }
         store.statusChanged = { [weak self] in self?.updateStatus() }
         store.showBlockedApp = { [weak self] in self?.openBlockedApp() }
         store.dismissBlockedApp = { [weak self] in self?.blockedAppWindow?.close() }
@@ -75,8 +76,14 @@ import Darwin
             window.title = "Habit Gate"; window.isReleasedWhenClosed = false; window.delegate = self
             window.titleVisibility = .hidden; window.titlebarAppearsTransparent = true
             window.toolbarStyle = .unified
+            window.collectionBehavior = [.fullScreenPrimary, .fullScreenAllowsTiling]
             window.contentView = NSHostingView(rootView: SettingsView(store: store))
-            window.minSize = NSSize(width: 880, height: 680); window.center(); settingsWindow = window
+            window.minSize = NSSize(width: 880, height: 680)
+            if !window.setFrameUsingName("HabitGateMainWindow"), let screen = window.screen ?? NSScreen.main {
+                window.setFrame(screen.visibleFrame, display: false)
+            }
+            window.setFrameAutosaveName("HabitGateMainWindow")
+            settingsWindow = window
         }
         settingsWindow?.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
     }
