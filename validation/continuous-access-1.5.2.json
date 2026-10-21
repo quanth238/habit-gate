@@ -32,7 +32,8 @@
     "manualStartAndEndSpendsOnlyElapsedTime": true,
     "installedSessionEnded": true,
     "ledgerMode": "0o600",
-    "keychainAfterInstall": "Waiting for local macOS approval; no credential was read by the agent."
+    "keychainAfterInstall": "Approved by the user in macOS; fresh Habitify sync verified afterward.",
+    "freshHabitifySyncPassed": true
   },
   "uiVerification": [
     "Installed main page opens the circular clock by default.",
