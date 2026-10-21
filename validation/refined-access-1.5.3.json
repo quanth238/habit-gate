@@ -1,0 +1,80 @@
+{
+  "date": "2026-10-21",
+  "nativeVersion": "1.5.3",
+  "nativeBuild": 19,
+  "chromeVersion": "1.1.1",
+  "scope": "Presentation only; daily accounting, enforcement and browser behavior are unchanged.",
+  "design": {
+    "tool": "Built-in imagegen",
+    "concept": "design/temporary-access/refined/imagegen-concept.png",
+    "exactPrompt": "design/temporary-access/refined/imagegen-prompt.txt",
+    "runtime": "Native SwiftUI shapes/text and existing macOS icons; generated concept is documentation only.",
+    "changes": [
+      "Open canvas replaces the enclosing timer card.",
+      "Thin tick dial, tabular digits and explicit state text.",
+      "One compact 200-point Start/End action.",
+      "Daily limit shown once in the header.",
+      "Separate app/reset/coverage strip with accessible settings shortcut.",
+      "Vertical space adapts to taller windows.",
+      "Sidebar branding and temporary-access footer are quieter.",
+      "Long app selections cap visible icons and show a remaining count."
+    ]
+  },
+  "checks": {
+    "swiftTestsPassed": 91,
+    "releaseBuildPassed": true,
+    "installedSignatureAndNativeHostPassed": true,
+    "installedMatchesSignedDist": true,
+    "permanentConfigurationPreserved": true,
+    "exactUsedTimePreserved": true,
+    "dailyLimitPreserved": true,
+    "temporaryAccessIsOff": true,
+    "ledgerMode": "0o600",
+    "freshHabitifySyncPassed": true,
+    "syncError": null,
+    "geforceRemainsExcluded": true
+  },
+  "visualChecks": [
+    "Ready state at 880 x 680 in light and dark.",
+    "Running state shows a decreasing balance and End access.",
+    "One-minute warning leaves End access and app strip visible.",
+    "Exhausted state shows 00:00, explains the reset and disables Start.",
+    "Minimum-size previews keep essential controls visible without scrolling.",
+    "Installed 980 x 780 window balances the dial and lower app strip."
+  ],
+  "screenshots": {
+    "design/temporary-access/refined/imagegen-concept.png": [
+      2016,
+      780
+    ],
+    "design/temporary-access/refined/installed-ready.png": [
+      4718592,
+      4292935744
+    ],
+    "design/temporary-access/refined/preview-active-880x680.png": [
+      4718592,
+      4292935744
+    ],
+    "design/temporary-access/refined/preview-dark-880x680.png": [
+      4718592,
+      4292935744
+    ],
+    "design/temporary-access/refined/preview-exhausted-880x680.png": [
+      4718592,
+      4292935744
+    ],
+    "design/temporary-access/refined/preview-light-880x680.png": [
+      4718592,
+      4292935744
+    ],
+    "design/temporary-access/refined/preview-warning-880x680.png": [
+      4718592,
+      4292935744
+    ]
+  },
+  "limitations": [
+    "No new CPU/memory benchmark; no performance target claim.",
+    "No full keyboard/VoiceOver audit.",
+    "Browser tests were not rerun because browser source, protocol and permissions are unchanged."
+  ]
+}

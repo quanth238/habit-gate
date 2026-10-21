@@ -137,7 +137,7 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
     }
     var subtitle: String {
         switch self {
-        case .temporary: return "A little time for what you need. One shared daily balance."
+        case .temporary: return "A little time for what you need."
         case .review: return "Review all choices and verify one Chrome profile before protection begins."
         case .overview: return "Access, Habitify verification and protection coverage."
         case .habits: return "Choose the habits that unlock your selected websites and apps."
@@ -162,25 +162,33 @@ struct SettingsView: View {
             sidebar
             Rectangle().fill(GateTheme.line).frame(width: 1)
             VStack(spacing: 0) {
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 22) {
-                        if !store.storageIssue.isEmpty {
-                            GateNotice(text: store.storageIssue, symbol: "externaldrive.badge.exclamationmark", warning: true)
-                            if store.needsRecovery {
-                                Button("Restore saved rules") { store.restoreSavedRules(); loadDraft() }.buttonStyle(GateButtonStyle(primary: true))
-                                Button("Choose rules backup…") { store.chooseRecoveryBackup(); loadDraft() }.buttonStyle(GateButtonStyle())
-                                Button("Show support folder") { NSWorkspace.shared.open(store.root) }.buttonStyle(GateButtonStyle())
+                GeometryReader { viewport in
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 22) {
+                            if !store.storageIssue.isEmpty {
+                                GateNotice(text: store.storageIssue, symbol: "externaldrive.badge.exclamationmark", warning: true)
+                                if store.needsRecovery {
+                                    Button("Restore saved rules") { store.restoreSavedRules(); loadDraft() }.buttonStyle(GateButtonStyle(primary: true))
+                                    Button("Choose rules backup…") { store.chooseRecoveryBackup(); loadDraft() }.buttonStyle(GateButtonStyle())
+                                    Button("Show support folder") { NSWorkspace.shared.open(store.root) }.buttonStyle(GateButtonStyle())
+              
+                    }
+                        }
+                        HStack(alignment: .top) {
+                            VStack(alignment: .leading, spacing: 9) {
+                                if page != .temporary { GateOverline(text: page == .overview ? "Your focus, protected" : page.title) }
+                                Text(page.headline).font(.system(size: page == .temporary ? 25 : 27, weight: page == .temporary ? .semibold : .bold)).tracking(-0.7)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                Text(page.subtitle).font(.system(size: 12)).foregroundStyle(.secondary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                            if page == .temporary {
+                                Spacer(minLength: 12)
+                                GatePill(text: "\(store.temporaryAccess.budget.todayMinutes) min daily", symbol: "clock")
                             }
                         }
-                        VStack(alignment: .leading, spacing: 9) {
-                            if page != .temporary { GateOverline(text: page == .overview ? "Your focus, protected" : page.title) }
-                            Text(page.headline).font(.system(size: 27, weight: .bold)).tracking(-0.7)
-                                .fixedSize(horizontal: false, vertical: true)
-                            Text(page.subtitle).font(.system(size: 12)).foregroundStyle(.secondary)
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
                         switch page {
-                        case .temporary: TemporaryAccessView(store: store, access: store.temporaryAccess)
+                        case .temporary: TemporaryAccessView(store: store, access: store.temporaryAccess).frame(maxHeight: .infinity)
                         case .review: activationReview
                         case .overview: overview
                         case .habits: habits
@@ -191,6 +199,8 @@ struct SettingsView: View {
                         }
                         if !localError.isEmpty { GateNotice(text: localError, symbol: "exclamationmark.circle", warning: true) }
                     }.padding(page == .temporary ? 24 : 30).frame(maxWidth: 850, alignment: .leading).frame(maxWidth: .infinity)
+                        .frame(minHeight: page == .temporary ? viewport.size.height : 0, alignment: .top)
+                  }
                 }
                 footer
             }.background(GateTheme.canvas)
@@ -210,7 +220,7 @@ struct SettingsView: View {
     }
     private var sidebar: some View {
         VStack(alignment: .leading, spacing: 0) {
-            GateBrand().padding(.horizontal, 17).padding(.top, 30).padding(.bottom, 34)
+            GateBrand(compact: true).padding(.horizontal, 20).padding(.top, 32).padding(.bottom, 30)
             VStack(spacing: 5) {
                 ForEach(SettingsPage.allCases.filter { $0 != .review || store.configuration.active == nil }) { item in
                     if item == .connection { Divider().padding(.vertical, 13).padding(.horizontal, 12) }
@@ -234,7 +244,7 @@ struct SettingsView: View {
                     Circle().fill(store.hasKey && store.snapshot.syncError == nil ? GateTheme.green : Color.orange).frame(width: 6, height: 6)
                     Text(store.isLoadingCredentials ? "Opening Keychain…" : !store.hasKey ? "Connect Habitify" : store.snapshot.syncError == nil ? "Habitify connected" : "Check connection").font(.system(size: 11, weight: .medium))
                 }
-                Text("Resets daily at 4 AM").font(.system(size: 10)).foregroundStyle(.secondary).padding(.leading, 13)
+                if page != .temporary { Text("Resets daily at 4 AM").font(.system(size: 10)).foregroundStyle(.secondary).padding(.leading, 13) }
             }.padding(22)
         }.frame(width: 210).background(GateTheme.sidebar)
     }
@@ -492,12 +502,16 @@ struct SettingsView: View {
                     .help("Sync now (⌘R)").accessibilityLabel("Sync now").keyboardShortcut("r", modifiers: .command)
                 GateSyncStatus(store: store)
                 Spacer()
-                if page != .overview {
+                if page == .temporary {
+                    Button { store.openHabitify() } label: { Label("Open Habitify", systemImage: "arrow.up.right") }
+                        .buttonStyle(.plain).font(.system(size: 11, weight: .medium)).foregroundStyle(.secondary)
+                } else if page != .overview {
                     Button { store.openHabitify() } label: { Label("Open Habitify", systemImage: "arrow.up.right") }
                         .buttonStyle(GateButtonStyle(primary: page != .temporary))
                 }
             }
-        }.padding(.horizontal, 27).padding(.vertical, 16).background(GateTheme.card)
+        }.padding(.horizontal, 27).padding(.vertical, page == .temporary ? 14 : 16)
+            .background(page == .temporary ? GateTheme.canvas : GateTheme.card)
             .overlay(alignment: .top) { Rectangle().fill(GateTheme.line).frame(height: 1) }
     }
     private var habitTiming: some View {

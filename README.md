@@ -165,3 +165,10 @@ A fresh live sync and the installed eight-row daily picker were verified. All **
 Temporary access opens a blue circular clock by default. Start immediately spends the shared daily allowance (15 minutes by default), continuously across app switching, idle time, sleep and screen lock. End restores app blocking and saves unused time; a later Start resumes the same daily balance. Zero ends access and disables Start until the reset or normal habit completion. No extra-time control exists. Daily-limit editing remains in Settings and applies at the next 4 AM boundary. Websites retain ordinary protection.
 
 See [the current flow, specification and screenshots](docs/DAILY-ACCESS.md) and [validation evidence](validation/continuous-access-1.5.2.json). This supersedes foreground-only counting in versions 1.5.0–1.5.1.
+
+
+## Refined timer interface · 1.5.3
+
+A new built-in imagegen concept guides the Temporary access page: an open canvas, a thin clock dial, tabular digits, one compact action and a quiet strip for app icons, reset time and coverage. The header holds the daily limit, and flexible vertical space keeps the composition balanced in taller windows. Ready, running, one-minute warning and exhausted states fit the 880 × 680 minimum; light and dark appearance use the existing native palette. The sidebar and timer footer are quieter, and the app strip handles longer selections without overflowing.
+
+The native implementation uses SwiftUI shapes and text. Daily counting, app enforcement and Chrome 1.1.1 are unchanged; all 91 Swift tests pass. See the [generated concept, exact prompt and rendered screenshots](design/temporary-access/refined/README.md) and [validation evidence](validation/refined-access-1.5.3.json).

@@ -68,108 +68,155 @@ struct DailyAccessCard: View {
     @ObservedObject var store: GateStore
     @ObservedObject var access: DailyAccessController
     var compact = false
+    private var apps: [BlockedApp] { store.configuration.active?.apps ?? [] }
     private var state: String {
-        if store.normalAccess { return "Essentials complete · apps unlocked" }
-        if !access.issue.isEmpty || store.needsRecovery { return "Allowance locked · needs attention" }
-        if access.remaining <= 0 { return "Daily allowance used up" }
-        if !access.accessStarted { return "Ready when you need it" }
-        return "Temporary access is on"
+        if store.normalAccess { return "Apps unlocked" }
+        if !access.issue.isEmpty || store.needsRecovery { return "Needs attention" }
+        if apps.isEmpty { return "No apps selected" }
+        if access.remaining <= 0 { return "Time used today" }
+        return access.accessStarted ? "Access on" : "Ready"
+    }
+    private var caption: String {
+        if store.normalAccess { return "Your essentials are complete. Enjoy your time." }
+        if apps.isEmpty { return "Choose the apps to protect in Mac apps." }
+        if access.remaining <= 0 { return "Complete your essentials or wait for the daily reset." }
+        return access.accessStarted ? "End access to save time for later." : "Start when needed. End access to save unused time."
     }
     var body: some View {
-        GateCard(padding: compact ? 14 : 16) {
-            VStack(alignment: .leading, spacing: compact ? 8 : 10) {
+        if compact { compactCard }
+        else {
+            VStack(spacing: 0) {
+                Spacer(minLength: 0)
+                liveCountdown
+                action.frame(width: 200).padding(.top, 22)
+                Text(caption).font(.system(size: 11)).foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true).padding(.top, 12)
+                warning.padding(.top, 10)
+                Spacer(minLength: 24)
+                appStrip
+                storageProblem.padding(.top, access.issue.isEmpty ? 0 : 12)
+            }.frame(maxWidth: .infinity)
+        }
+    }
+    private var compactCard: some View {
+        GateCard(padding: 14) {
+            VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Label("Today’s app allowance", systemImage: "timer")
                         .font(.system(size: 12, weight: .semibold)).foregroundStyle(GateTheme.blue)
                     Spacer()
                     Text("\(access.budget.todayMinutes) min / day").font(.system(size: 10)).foregroundStyle(.secondary)
-                    if compact {
-                        Button { store.requestTemporaryAccess(settings: true) } label: { Image(systemName: "gearshape") }
-                            .buttonStyle(.plain).accessibilityLabel("Configure daily allowance")
-                    }
+                    Button { store.requestTemporaryAccess(settings: true) } label: { Image(systemName: "gearshape") }
+                        .buttonStyle(.plain).accessibilityLabel("Configure daily allowance")
                 }
-                if !compact {
-                    HStack(spacing: 10) {
-                        ForEach(store.configuration.active?.apps ?? []) { app in
-                            MacAppIcon(app: app).help(app.name).accessibilityHidden(false).accessibilityLabel(app.name)
-                        }
-                    }.frame(maxWidth: .infinity)
-                }
-                if access.isCounting {
-                    TimelineView(.periodic(from: .now, by: 1)) { _ in countdown }
-                } else { countdown }
-                if access.remaining > 0 && access.remaining <= 60 {
-                    Text("One minute or less left today").font(.system(size: 10, weight: .medium)).foregroundStyle(.orange)
-                }
-                if !compact {
-                    Text(access.accessStarted ? "End access to block apps again and save unused time." : "Start when needed. Time counts continuously until you end access.")
-                        .font(.system(size: 11)).foregroundStyle(.secondary).frame(maxWidth: .infinity)
-                }
-                if access.accessStarted {
-                    Button { access.endAccess() } label: {
-                        Text("End access").frame(maxWidth: .infinity)
-                    }.buttonStyle(GateButtonStyle(primary: true))
-                } else {
-                    Button { store.startDailyAccess() } label: {
-                        Text("Start access").frame(maxWidth: .infinity)
-                    }.buttonStyle(GateButtonStyle(primary: true))
-                        .disabled(!access.canStart || store.normalAccess || store.needsRecovery)
-                }
-                if !compact {
-                    HStack {
-                        Label("Websites stay protected", systemImage: "lock.shield")
-                            .font(.system(size: 10)).foregroundStyle(.secondary)
-                        Spacer(minLength: 8)
-                        Button { store.requestTemporaryAccess(settings: true) } label: {
-                            Label("Allowance settings", systemImage: "gearshape")
-                        }.buttonStyle(.plain).font(.system(size: 10, weight: .medium)).foregroundStyle(GateTheme.blue)
-                    }
-                }
-                if !access.issue.isEmpty {
-                    Text(access.issue).font(.system(size: 10)).foregroundStyle(.orange).fixedSize(horizontal: false, vertical: true)
-                    if access.issue.hasPrefix("Daily allowance could not be saved.") {
-                        Button("Retry storage") { access.retryStorage() }.buttonStyle(GateButtonStyle())
-                    }
-                }
+                liveCountdown
+                warning
+                action
+                storageProblem
             }
         }
+    }
+    @ViewBuilder private var liveCountdown: some View {
+        if access.isCounting {
+            TimelineView(.periodic(from: .now, by: 1)) { _ in countdown }
+        } else { countdown }
     }
     @ViewBuilder private var countdown: some View {
         let seconds = max(0, Int(ceil(access.remaining)))
         let digits = String(format: "%02d:%02d", seconds / 60, seconds % 60)
         if compact {
-            HStack(alignment: .center, spacing: 16) {
+            HStack(spacing: 16) {
                 Text(digits).font(.system(size: 29, weight: .semibold, design: .rounded)).monospacedDigit()
                     .accessibilityLabel("\(seconds / 60) minutes \(seconds % 60) seconds left today")
-                countdownStatus
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(state).font(.system(size: 12, weight: .medium))
+                    Text("Resets at \(access.budget.resetsAt.formatted(date: .omitted, time: .shortened))")
+                        .font(.system(size: 10)).foregroundStyle(.secondary)
+                }
                 Spacer(minLength: 0)
             }
         } else {
-            VStack(spacing: 10) {
-                ZStack {
-                    Circle().stroke(GateTheme.blue.opacity(0.12), lineWidth: 10)
-                    Circle().trim(from: 0, to: min(1, max(0, access.remaining / access.budget.totalSeconds)))
-                        .stroke(GateTheme.blue, style: StrokeStyle(lineWidth: 10, lineCap: .round))
-                        .rotationEffect(.degrees(-90))
-                    VStack(spacing: 7) {
-                        Text(digits).font(.system(size: 49, weight: .semibold, design: .rounded)).monospacedDigit()
-                            .tracking(-1).accessibilityLabel("\(seconds / 60) minutes \(seconds % 60) seconds left today")
-                        Text("remaining today").font(.system(size: 11)).foregroundStyle(.secondary)
-                        if access.isCounting {
-                            Text("Ends at \(min(access.budget.resetsAt, Date().addingTimeInterval(access.remaining)).formatted(date: .omitted, time: .shortened))")
-                                .font(.system(size: 11)).foregroundStyle(.secondary)
-                        }
+            let fraction = min(1, max(0, access.remaining / access.budget.totalSeconds))
+            ZStack {
+                Circle().stroke(GateTheme.line, lineWidth: 3).accessibilityHidden(true)
+                ForEach(0..<12, id: \.self) { tick in
+                    Capsule().fill(GateTheme.secondary.opacity(0.5))
+                        .frame(width: 1, height: tick % 3 == 0 ? 7 : 4)
+                        .offset(y: -102).rotationEffect(.degrees(Double(tick) * 30))
+                        .accessibilityHidden(true)
+                }
+                if access.isCounting {
+                    Circle().trim(from: 0, to: fraction)
+                        .stroke(GateTheme.blue, style: StrokeStyle(lineWidth: 4, lineCap: .round))
+                        .rotationEffect(.degrees(-90)).accessibilityHidden(true)
+                    Circle().fill(GateTheme.blue).frame(width: 6, height: 6)
+                        .offset(y: -116).rotationEffect(.degrees(fraction * 360)).accessibilityHidden(true)
+                }
+                if access.remaining > 0 {
+                    Circle().fill(GateTheme.blue).frame(width: 6, height: 6).offset(y: -116).accessibilityHidden(true)
+                }
+                VStack(spacing: 9) {
+                    Text(state).font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(access.isCounting ? GateTheme.blue : GateTheme.secondary)
+                    Text(digits).font(.system(size: 58, weight: .medium)).monospacedDigit().tracking(-2)
+                        .accessibilityLabel("\(seconds / 60) minutes \(seconds % 60) seconds left today")
+                    Text("remaining today").font(.system(size: 11)).foregroundStyle(.secondary)
+                    if access.isCounting {
+                        Text("Ends at \(min(access.budget.resetsAt, Date().addingTimeInterval(access.remaining)).formatted(date: .omitted, time: .shortened))")
+                            .font(.system(size: 10)).foregroundStyle(.secondary)
                     }
-                }.frame(width: 196, height: 196).padding(5)
-                countdownStatus
-            }.frame(maxWidth: .infinity)
+                }
+            }.frame(width: 232, height: 232).padding(4)
         }
     }
-    private var countdownStatus: some View {
-        VStack(alignment: compact ? .leading : .center, spacing: 5) {
-            Text(state).font(.system(size: 12, weight: .medium))
-            Text("Remaining today · resets at \(access.budget.resetsAt.formatted(date: .omitted, time: .shortened))")
-                .font(.system(size: 10)).foregroundStyle(.secondary)
+    @ViewBuilder private var action: some View {
+        if access.accessStarted {
+            Button { access.endAccess() } label: {
+                Label("End access", systemImage: "stop.fill").frame(maxWidth: .infinity)
+            }.buttonStyle(GateButtonStyle(primary: true))
+        } else {
+            Button { store.startDailyAccess() } label: {
+                Label("Start access", systemImage: "play.fill").frame(maxWidth: .infinity)
+            }.buttonStyle(GateButtonStyle(primary: true))
+                .disabled(!access.canStart || store.normalAccess || store.needsRecovery)
+        }
+    }
+    private var appStrip: some View {
+        VStack(spacing: 13) {
+            Rectangle().fill(GateTheme.line).frame(height: 1)
+            HStack(spacing: 9) {
+                Text("For blocked apps").font(.system(size: 11)).foregroundStyle(.secondary)
+                ForEach(Array(apps.prefix(5))) { app in
+                    MacAppIcon(app: app).help(app.name).accessibilityHidden(false).accessibilityLabel(app.name)
+                }
+                if apps.count > 5 {
+                    Text("+\(apps.count - 5)").font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(.secondary).accessibilityLabel("\(apps.count - 5) more blocked apps")
+                }
+                Spacer(minLength: 8)
+                Button { store.requestTemporaryAccess(settings: true) } label: { Image(systemName: "gearshape") }
+                    .buttonStyle(.plain).foregroundStyle(.secondary).help("Daily allowance settings")
+                    .accessibilityLabel("Daily allowance settings")
+            }
+            HStack(spacing: 6) {
+                Text("Resets at \(access.budget.resetsAt.formatted(date: .omitted, time: .shortened))")
+                Text("·").accessibilityHidden(true)
+                Label("Websites stay protected", systemImage: "lock.shield")
+                Spacer(minLength: 0)
+            }.font(.system(size: 10)).foregroundStyle(.secondary)
+        }.frame(maxWidth: 500)
+    }
+    @ViewBuilder private var warning: some View {
+        if access.remaining > 0 && access.remaining <= 60 {
+            Text("One minute or less left today").font(.system(size: 10, weight: .medium)).foregroundStyle(.orange)
+        }
+    }
+    @ViewBuilder private var storageProblem: some View {
+        if !access.issue.isEmpty {
+            Text(access.issue).font(.system(size: 10)).foregroundStyle(.orange).fixedSize(horizontal: false, vertical: true)
+            if access.issue.hasPrefix("Daily allowance could not be saved.") {
+                Button("Retry storage") { access.retryStorage() }.buttonStyle(GateButtonStyle())
+            }
         }
     }
 }
