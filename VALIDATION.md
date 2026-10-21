@@ -237,3 +237,11 @@ Minimum-window light/dark screenshots and Command-S preference saving were check
 Final warm samples: visible window 0.933% CPU / 120.16 MB mean RSS; closed window 0.673% / 108.16 MB over approximately 65 seconds each. The original idle CPU/RSS targets are not met across those samples. Initial closed measurements were lower; different warm-up/authentication states prevent attributing the delta solely to the allowance timer.
 
 See [the feature specification, flow, screenshots and detailed evidence](docs/DAILY-ACCESS.md), [machine-readable validation](validation/daily-access-1.5.0.json) and [rollback script](scripts/rollback-daily-access.sh).
+
+## Manual daily access and dedicated Settings · 1.5.1 (17)
+
+The main app now opens a large countdown with Start access / End access. Editing the daily allowance moved to the Settings tab. A manual grant uses only the remaining shared daily time, counts foreground app use, and ends on explicit End, exhaustion, a new 4 AM period or normal habit unlock. Launch restores used time with access off.
+
+87 Swift tests and 20 Chrome tests passed. The native fixture with explicit Start verified visible access, exactly one hide at exhaustion, a preserved process and no duplicate notice. Installed UI verification confirmed Start → End → Start without refilling the balance, the settings shortcut, unchanged permanent rules and successful Habitify sync. Chrome remains 1.1.1. See [evidence](validation/manual-access-1.5.1.json) and [current screenshots/specification](docs/DAILY-ACCESS.md).
+
+No new performance claim is made; the earlier warm 1.5.0 samples and their target misses remain recorded above.

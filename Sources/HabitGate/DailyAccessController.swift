@@ -12,6 +12,7 @@ func continuousSeconds() -> TimeInterval {
     @Published private(set) var budget: DailyAccessBudget
     @Published private(set) var issue = ""
     @Published private(set) var notice = ""
+    @Published private(set) var accessStarted = false
     var onChange: (() -> Void)?
     private let now: () -> Date
     private let continuous: () -> TimeInterval
@@ -62,19 +63,36 @@ func continuousSeconds() -> TimeInterval {
         do { try self.save(budget); lastStored = DailyAccessFile.load(root: root) ?? budget }
         catch { issue = "Daily allowance could not be saved. App access stays locked until local storage is working." }
     }
-    var isCounting: Bool { activeContinuous != nil && issue.isEmpty && available }
+    var isCounting: Bool { accessStarted && activeContinuous != nil && issue.isEmpty && available }
+    var canStart: Bool { !accessStarted && available && issue.isEmpty && remaining > 0 }
     var activeBundleID: String? { isCounting ? budget.activeBundleID : nil }
     var remaining: Double {
         let elapsed = activeContinuous.map { max(0, continuous() - $0) } ?? 0
         return max(0, budget.remainingSeconds - elapsed)
     }
     func grant() -> AppAccessGrant? {
-        guard available, issue.isEmpty, remaining > 0 else { return nil }
+        guard accessStarted, available, issue.isEmpty, remaining > 0 else { return nil }
         return .init(bundleIDs: configured, expiresAt: min(budget.resetsAt, now().addingTimeInterval(remaining)))
+    }
+    @discardableResult func startAccess() -> Bool {
+        guard canStart else { return false }
+        var next = budget; next.savedAt = now()
+        guard persist(next) else { onChange?(); return false }
+        budget = next; accessStarted = true
+        notice = "Access is on. Only foreground use of blocked apps spends today’s remaining time."
+        onChange?(); return true
+    }
+    func endAccess() {
+        settle(date: now(), clock: continuous())
+        accessStarted = false; foregroundID = nil; schedule()
+        notice = "Access ended. Your remaining daily time is saved for later."
+        onChange?()
     }
     func refresh(foreground: String?, configured: Set<String>, normalAccess: Bool, recovery: Bool, suspended: Bool = false) {
         let date = now(); let clock = continuous()
         let previousAvailable = available
+        let previouslyStarted = accessStarted
+        if normalAccess || recovery { accessStarted = false }
         self.configured = configured
         available = !normalAccess && !recovery && !configured.isEmpty
         let rollback = date.timeIntervalSince(checkedAt) < clock - checkedContinuous - 2 || clock < checkedContinuous
@@ -84,19 +102,17 @@ func continuousSeconds() -> TimeInterval {
         }
         if date >= budget.resetsAt, date >= budget.savedAt {
             let minutes = budget.limitMinutes
-            let wasCounting = activeContinuous != nil
-            let elapsedAfterReset = wasCounting ? max(0, date.timeIntervalSince(budget.resetsAt)) : 0
             budget = DailyAccessBudget(now: date, minutes: minutes, calendar: calendar())
-            budget.consume(elapsedAfterReset)
+            accessStarted = false
             activeContinuous = nil; issue = ""; notice = ""; warned = false
             if !persist() { available = false }
         }
         let id = foreground?.lowercased()
-        foregroundID = available && !suspended && configured.contains(id ?? "") ? id : nil
+        foregroundID = accessStarted && available && !suspended && configured.contains(id ?? "") ? id : nil
         if remaining <= 0, activeContinuous != nil {
             settle(date: date, clock: clock)
             notice = "Today’s allowance is used up. Complete your essentials or wait until 4 AM."
-            foregroundID = nil; schedule(); onChange?()
+            accessStarted = false; foregroundID = nil; schedule(); onChange?()
         }
         if !issue.isEmpty || remaining <= 0 { foregroundID = nil }
         let changedApp = budget.activeBundleID != foregroundID
@@ -108,7 +124,7 @@ func continuousSeconds() -> TimeInterval {
                 if persist(next) { budget = next; activeContinuous = clock }
             }
             schedule(); onChange?()
-        } else if previousAvailable != available { onChange?() }
+        } else if previousAvailable != available || previouslyStarted != accessStarted { onChange?() }
         warnIfNeeded()
     }
     func verifyStorage() {
@@ -151,11 +167,11 @@ func continuousSeconds() -> TimeInterval {
             issue = "Daily allowance could not be saved. App access is locked; the balance was not extended."
             if let started = activeContinuous { budget.consume(continuous() - started) }
             budget.activeSince = nil; budget.activeBundleID = nil
-            activeContinuous = nil; expiry?.cancel(); warning?.cancel(); return false
+            accessStarted = false; activeContinuous = nil; expiry?.cancel(); warning?.cancel(); return false
         }
     }
     private func exhaust(_ text: String) {
-        activeContinuous = nil; budget.usedSeconds = budget.totalSeconds
+        accessStarted = false; activeContinuous = nil; budget.usedSeconds = budget.totalSeconds
         budget.activeSince = nil; budget.activeBundleID = nil; budget.savedAt = min(now(), budget.resetsAt.addingTimeInterval(-0.001))
         issue = text; expiry?.cancel(); warning?.cancel(); _ = persist(); onChange?()
     }

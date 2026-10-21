@@ -46,6 +46,8 @@ import GateCore
             self.apply()
         }
         blocker.onBlocked = { [weak self] _ in self?.notices += 1 }
+        controller.refresh(foreground: nil, configured: [target.id], normalAccess: false, recovery: false)
+        precondition(controller.startAccess())
         controller.refresh(foreground: simulated ? target.id : nil, configured: [target.id], normalAccess: false, recovery: false)
         blocker.start(); apply()
         watchdog = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in

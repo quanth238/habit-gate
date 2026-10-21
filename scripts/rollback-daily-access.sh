@@ -7,10 +7,7 @@ HG_INSTALLED_APP='/Applications/Habit Gate.app'
 codesign --verify --strict "$HG_BACKUP_APP"
 # End access before restoring the earlier app, which has no allowance support.
 pkill -x HabitGate || true
-HG_ALLOWANCE_FILE="$HOME/Library/Application Support/HabitGate/daily-access.json"
-if [[ -f "$HG_ALLOWANCE_FILE" ]]; then
-  mv "$HG_ALLOWANCE_FILE" "${HG_ALLOWANCE_FILE}.rollback-$(date +%Y%m%dT%H%M%S)"
-fi
+# Retain the daily ledger so rollback never replenishes spent time.
 HG_OLD_SESSION="$HOME/Library/Application Support/HabitGate/temporary-access.json"
 if [[ -f "$HG_OLD_SESSION" ]]; then
   mv "$HG_OLD_SESSION" "${HG_OLD_SESSION}.rollback-$(date +%Y%m%dT%H%M%S)"

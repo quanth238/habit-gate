@@ -42,6 +42,7 @@ import Darwin
         store.showSettings = { [weak self] in self?.openSettings() }
         store.statusChanged = { [weak self] in self?.updateStatus() }
         store.showBlockedApp = { [weak self] in self?.openBlockedApp() }
+        store.dismissBlockedApp = { [weak self] in self?.blockedAppWindow?.close() }
         store.start(); updateStatus()
         if store.configuration.active == nil { openSettings() }
     }
@@ -108,7 +109,7 @@ import Darwin
     func windowWillClose(_ notification: Notification) {
         guard let window = notification.object as? NSWindow else { return }
         window.contentView = nil
-        if window === settingsWindow { settingsWindow = nil }
+        if window === settingsWindow { settingsWindow = nil; store.pendingAccessApp = nil }
         if window === blockedAppWindow { blockedAppWindow = nil }
     }
     func applicationWillTerminate(_ notification: Notification) { store?.temporaryAccess.suspend() }

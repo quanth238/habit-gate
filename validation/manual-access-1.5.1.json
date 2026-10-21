@@ -1,0 +1,61 @@
+{
+  "date": "2026-10-21",
+  "nativeVersion": "1.5.1",
+  "nativeBuild": 17,
+  "chromeVersion": "1.1.1",
+  "behavior": {
+    "startRequired": true,
+    "endRestoresProtection": true,
+    "sharedDailyMinutes": 15,
+    "configuredNextDayMinutes": 15,
+    "foregroundOnly": true,
+    "restartingDoesNotRefill": true,
+    "newDayAndAppRestartRequireStart": true,
+    "websiteBypass": false,
+    "mainPage": "large countdown and Start / End",
+    "allowanceEditor": "Settings"
+  },
+  "checks": {
+    "swiftTestsPassed": 87,
+    "chromeTestsPassed": 20,
+    "releaseBuildPassed": true,
+    "installedSignatureAndNativeHostPassed": true,
+    "signedDistMatchesInstalled": true,
+    "permanentConfigurationPreserved": true,
+    "savedUsagePreservedAcrossInstallAndStartEnd": true,
+    "ledgerMode": "0o600",
+    "lastSuccessfulHabitifySync": "2026-10-21T14:40:47Z",
+    "syncError": null,
+    "normalBrowserAccess": "blocked"
+  },
+  "uiVerification": [
+    "Opening the activated app shows the countdown by default.",
+    "Installed Start changed to End with the daily balance retained.",
+    "Installed End returned to Start and preserved unused time.",
+    "Countdown settings shortcut opened the Settings tab with duration controls.",
+    "Installed Settings showed launch at login enabled.",
+    "Main countdown and Start fit the 880 x 680 layout fixture; Settings may scroll."
+  ],
+  "nativeExpiryFixture": {
+    "checks": {
+      "foreground_timer_started": true,
+      "grant_revoked": true,
+      "hide_called_once": true,
+      "no_duplicate_notice": true,
+      "process_preserved": true,
+      "shared_minute_exhausted": true,
+      "window_hidden": true,
+      "window_was_visible_during_grant": true
+    },
+    "error": "",
+    "notices": 0,
+    "passed": true,
+    "simulated_foreground": true
+  },
+  "performance": "Not benchmarked separately. Earlier warm 1.5.0 measurements exceeded the original targets; no performance improvement is claimed.",
+  "screenshots": [
+    "design/temporary-access/manual/installed-countdown-dark.png",
+    "design/temporary-access/manual/installed-active-dark.png",
+    "design/temporary-access/manual/installed-settings-dark.png"
+  ]
+}

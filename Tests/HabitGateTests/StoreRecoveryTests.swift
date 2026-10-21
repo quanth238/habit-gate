@@ -33,7 +33,9 @@ private actor EmptyVault: CredentialStorage {
         let config = Configuration(active: policy)
         try ConfigurationRepository.save(config, root: root)
         let store = GateStore(root: root, vault: EmptyVault())
+        store.tick()
         let proof = store.snapshot
+        #expect(store.startDailyAccess())
         store.refreshDailyAccess(foreground: "com.example.chat")
         #expect(store.temporaryAccess.isCounting)
         #expect(store.configuration == config); #expect(store.snapshot == proof)

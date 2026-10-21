@@ -192,7 +192,7 @@ struct BlockedMacAppView: View {
                     .buttonStyle(GateButtonStyle()).disabled(store.isSyncing || !store.hasKey)
             }
             if !allowed {
-                Button { store.requestTemporaryAccess() } label: {
+                Button { store.requestTemporaryAccess(for: store.blockedApp) } label: {
                     Label("View daily app allowance", systemImage: "timer")
                         .frame(maxWidth: .infinity)
                 }.buttonStyle(GateButtonStyle())

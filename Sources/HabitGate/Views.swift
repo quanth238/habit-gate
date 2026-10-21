@@ -11,7 +11,7 @@ struct TodayView: View {
             HStack {
                 GateBrand(compact: true)
                 Spacer()
-                Button { store.showSettings?() } label: { Image(systemName: "gearshape").frame(width: 28, height: 28) }
+                Button { store.requestTemporaryAccess(settings: true) } label: { Image(systemName: "gearshape").frame(width: 28, height: 28) }
                     .buttonStyle(.plain).foregroundStyle(.secondary).help("Open Habit Gate settings")
                     .accessibilityLabel("Open Habit Gate settings")
             }.padding(.bottom, 20)
@@ -108,7 +108,7 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
         case .websites: return "Websites"
         case .apps: return "Mac apps"
         case .connection: return "Connection"
-        case .preferences: return "Preferences"
+        case .preferences: return "Settings"
         }
     }
     var symbol: String {
@@ -154,9 +154,8 @@ struct SettingsView: View {
     @LocalState private var apiKey = ""
     @LocalState private var selection = Set<String>()
     @LocalState private var domains = ""
-    @LocalState private var page = SettingsPage.overview
+    @LocalState private var page = SettingsPage.temporary
     @LocalState private var localError = ""
-    @LocalState private var accessPageID = UUID()
     @LocalState private var confirmDeleteKey = false
     var body: some View {
         HStack(spacing: 0) {
@@ -181,7 +180,7 @@ struct SettingsView: View {
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                         switch page {
-                        case .temporary: TemporaryAccessView(store: store, access: store.temporaryAccess).id(accessPageID)
+                        case .temporary: TemporaryAccessView(store: store, access: store.temporaryAccess)
                         case .review: activationReview
                         case .overview: overview
                         case .habits: habits
@@ -198,11 +197,11 @@ struct SettingsView: View {
         }.tint(GateTheme.blue).frame(minWidth: 880, idealWidth: 980, minHeight: 648, idealHeight: 748)
              .onAppear {
                  loadDraft()
-                 if store.temporaryAccessRequest != nil { page = .temporary; store.temporaryAccessRequest = nil }
+                 if store.temporaryAccessRequest != nil { page = store.temporaryAccessOpensSettings ? .preferences : .temporary; store.temporaryAccessRequest = nil }
                  else if store.configuration.active == nil { page = store.hasKey ? .habits : .connection }
              }
              .onChange(of: store.temporaryAccessRequest) { request in
-                 if request != nil { page = .temporary; accessPageID = UUID(); store.temporaryAccessRequest = nil }
+                 if request != nil { page = store.temporaryAccessOpensSettings ? .preferences : .temporary; store.temporaryAccessRequest = nil }
              }
             .confirmationDialog("Delete the saved Habitify API key from this Mac?", isPresented: $confirmDeleteKey) {
                 Button("Delete API key and disconnect", role: .destructive) { Task { await store.disconnect(deleteKey: true) } }
@@ -216,7 +215,6 @@ struct SettingsView: View {
                 ForEach(SettingsPage.allCases.filter { $0 != .review || store.configuration.active == nil }) { item in
                     if item == .connection { Divider().padding(.vertical, 13).padding(.horizontal, 12) }
                     Button {
-                        if item == .temporary { accessPageID = UUID() }
                         page = item; localError = ""
                     } label: {
                         HStack(spacing: 11) {
@@ -458,6 +456,7 @@ struct SettingsView: View {
     }
     private var preferences: some View {
         VStack(alignment: .leading, spacing: 17) {
+            DailyAccessSettingsView(store: store, access: store.temporaryAccess)
             GateCard {
                 VStack(alignment: .leading, spacing: 18) {
                     Text("Your daily routine").font(.system(size: 14, weight: .semibold))
@@ -495,7 +494,7 @@ struct SettingsView: View {
                 Spacer()
                 if page != .overview {
                     Button { store.openHabitify() } label: { Label("Open Habitify", systemImage: "arrow.up.right") }
-                        .buttonStyle(GateButtonStyle(primary: true))
+                        .buttonStyle(GateButtonStyle(primary: page != .temporary))
                 }
             }
         }.padding(.horizontal, 27).padding(.vertical, 16).background(GateTheme.card)

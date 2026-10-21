@@ -15,11 +15,17 @@ import GateCore
     func controller(_ root: URL, _ clock: Clock) -> DailyAccessController {
         DailyAccessController(root: root, now: { clock.date }, continuous: { clock.seconds }, calendar: calendar, schedulesActions: false)
     }
+    func begin(_ access: DailyAccessController, foreground: String? = nil) {
+        access.refresh(foreground: nil, configured: apps, normalAccess: false, recovery: false)
+        #expect(access.startAccess())
+        access.refresh(foreground: foreground, configured: apps, normalAccess: false, recovery: false)
+    }
     @Test func foregroundCountsSwitchingAwayPausesAndAppsShareDailyBalance() {
         let root = root(); defer { try? FileManager.default.removeItem(at: root) }
         let c = Clock(); let access = controller(root, c)
         access.refresh(foreground: nil, configured: apps, normalAccess: false, recovery: false)
-        #expect(access.remaining == 900); #expect(!access.isCounting); #expect(access.grant() != nil)
+        #expect(access.remaining == 900); #expect(!access.isCounting); #expect(access.grant() == nil)
+        #expect(access.startAccess()); #expect(access.grant() != nil)
         c.advance(120); #expect(access.remaining == 900)
         access.refresh(foreground: "com.example.chat", configured: apps, normalAccess: false, recovery: false)
         #expect(access.isCounting)
@@ -40,10 +46,10 @@ import GateCore
     @Test func restartPreservesPausedBalanceAndChargesUnfinishedForegroundSegment() {
         let root = root(); defer { try? FileManager.default.removeItem(at: root) }
         let c = Clock(); let access = controller(root, c)
-        access.refresh(foreground: "com.example.chat", configured: apps, normalAccess: false, recovery: false)
+        begin(access, foreground: "com.example.chat")
         c.advance(120)
         let restored = controller(root, c)
-        #expect(restored.remaining == 780); #expect(!restored.isCounting)
+        #expect(restored.remaining == 780); #expect(!restored.isCounting); #expect(!restored.accessStarted)
         c.advance(300)
         #expect(controller(root, c).remaining == 780)
     }
@@ -54,11 +60,12 @@ import GateCore
             save: { _ in if fail { throw CocoaError(.fileWriteUnknown) }; writes += 1 }, schedulesActions: false)
         fail = true
         access.refresh(foreground: "com.example.chat", configured: apps, normalAccess: false, recovery: false)
+        #expect(!access.startAccess())
         #expect(!access.isCounting); #expect(access.grant() == nil)
         fail = false
         access.retryStorage(); #expect(access.issue.isEmpty); #expect(access.remaining == 900)
         let clean = controller(root, c)
-        clean.refresh(foreground: "com.example.chat", configured: apps, normalAccess: false, recovery: false)
+        begin(clean, foreground: "com.example.chat")
         c.advance(800); clean.refresh(foreground: nil, configured: apps, normalAccess: false, recovery: false)
         #expect(clean.setMinutes(60)); #expect(clean.remaining == 100); #expect(clean.budget.todayMinutes == 15)
         #expect(clean.budget.limitMinutes == 60)
@@ -71,7 +78,7 @@ import GateCore
         var zone = calendar()
         let access = DailyAccessController(root: root, now: { c.date }, continuous: { c.seconds }, calendar: { zone }, schedulesActions: false)
         #expect(access.setMinutes(5))
-        access.refresh(foreground: "com.example.chat", configured: apps, normalAccess: false, recovery: false)
+        begin(access, foreground: "com.example.chat")
         c.advance(30)
         zone.timeZone = TimeZone(identifier: "Pacific/Auckland")!
         access.refresh(foreground: "com.example.chat", configured: apps, normalAccess: false, recovery: false)
@@ -79,12 +86,15 @@ import GateCore
         zone = calendar(); c.advance(30)
         access.refresh(foreground: "com.example.chat", configured: apps, normalAccess: false, recovery: false)
         #expect(access.budget.todayMinutes == 5); #expect(access.remaining == 300)
+        #expect(!access.accessStarted); #expect(access.grant() == nil)
+        #expect(access.startAccess())
+        access.refresh(foreground: "com.example.chat", configured: apps, normalAccess: false, recovery: false)
         c.advance(10); #expect(access.remaining == 290)
     }
     @Test func sleepLockRecoveryOfflineAndHabitUnlock() {
         let root = root(); defer { try? FileManager.default.removeItem(at: root) }
         let c = Clock(); let access = controller(root, c)
-        access.refresh(foreground: "com.example.chat", configured: apps, normalAccess: false, recovery: false)
+        begin(access, foreground: "com.example.chat")
         c.advance(100); access.suspend(); c.advance(3600)
         #expect(access.remaining == 800)
         access.refresh(foreground: "com.example.chat", configured: apps, normalAccess: false, recovery: false, suspended: true)
@@ -100,7 +110,7 @@ import GateCore
     @Test func clockRollbackMissingAndMalformedStateFailClosed() throws {
         let root = root(); defer { try? FileManager.default.removeItem(at: root) }
         let c = Clock(); let access = controller(root, c)
-        access.refresh(foreground: "com.example.chat", configured: apps, normalAccess: false, recovery: false)
+        begin(access, foreground: "com.example.chat")
         c.advance(20); c.date = c.date.addingTimeInterval(-10)
         access.refresh(foreground: "com.example.chat", configured: apps, normalAccess: false, recovery: false)
         #expect(access.grant() == nil); #expect(!access.issue.isEmpty)
@@ -115,12 +125,32 @@ import GateCore
         let root = root(); let c = Clock(); var writes = 0
         let access = DailyAccessController(root: root, now: { c.date }, continuous: { c.seconds }, calendar: calendar,
             save: { _ in writes += 1 }, schedulesActions: false)
-        access.refresh(foreground: "com.example.chat", configured: apps, normalAccess: false, recovery: false)
+        begin(access, foreground: "com.example.chat")
         for _ in 0..<20 {
             c.advance(1); access.refresh(foreground: "com.example.chat", configured: apps, normalAccess: false, recovery: false)
         }
-        #expect(writes == 2)
+        #expect(writes == 3)
         c.advance(820); access.refresh(foreground: "com.example.chat", configured: apps, normalAccess: false, recovery: false)
-        #expect(access.notice.contains("One minute")); #expect(writes == 2)
+        #expect(access.notice.contains("One minute")); #expect(writes == 3)
     }
+    @Test func manualStartAndEndNeverRefillTheDailyBalance() {
+        let root = root(); defer { try? FileManager.default.removeItem(at: root) }
+        let c = Clock(); let access = controller(root, c)
+        access.refresh(foreground: "com.example.chat", configured: apps, normalAccess: false, recovery: false)
+        c.advance(60)
+        #expect(!access.isCounting); #expect(access.grant() == nil); #expect(access.remaining == 900)
+        #expect(access.startAccess()); #expect(!access.startAccess())
+        access.refresh(foreground: "com.example.chat", configured: apps, normalAccess: false, recovery: false)
+        c.advance(120); access.endAccess()
+        #expect(access.remaining == 780); #expect(!access.accessStarted); #expect(access.grant() == nil)
+        access.refresh(foreground: "com.example.chat", configured: apps, normalAccess: false, recovery: false)
+        c.advance(300); #expect(access.remaining == 780)
+        #expect(access.startAccess())
+        access.refresh(foreground: "com.example.meeting", configured: apps, normalAccess: false, recovery: false)
+        c.advance(780)
+        access.refresh(foreground: "com.example.meeting", configured: apps, normalAccess: false, recovery: false)
+        #expect(access.remaining == 0); #expect(!access.accessStarted)
+        #expect(!access.startAccess()); access.endAccess(); #expect(access.remaining == 0)
+    }
+
 }

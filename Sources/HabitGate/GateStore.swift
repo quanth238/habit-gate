@@ -23,6 +23,9 @@ import UniformTypeIdentifiers
     @Published private(set) var needsRecovery = false
     let temporaryAccess: DailyAccessController
     @Published var temporaryAccessRequest: UUID?
+    var temporaryAccessOpensSettings = false
+    var pendingAccessApp: BlockedApp?
+    var dismissBlockedApp: (() -> Void)?
     let root: URL
     var showToday: (() -> Void)?
     var showSettings: (() -> Void)?
@@ -279,8 +282,19 @@ import UniformTypeIdentifiers
         if habitsChanged { Task { await sync() } }
     }
     var normalAccess: Bool { snapshot.access == "allowed" && snapshot.valid(at: Date()) }
-    func requestTemporaryAccess() {
+    func requestTemporaryAccess(for app: BlockedApp? = nil, settings: Bool = false) {
+        pendingAccessApp = app
+        temporaryAccessOpensSettings = settings
         temporaryAccessRequest = UUID(); showSettings?()
+    }
+    @discardableResult func startDailyAccess() -> Bool {
+        tick()
+        guard temporaryAccess.startAccess() else { return false }
+        if let app = pendingAccessApp {
+            pendingAccessApp = nil; dismissBlockedApp?()
+            openGuardedApp(app)
+        }
+        return true
     }
     func refreshDailyAccess(foreground: String?) {
         temporaryAccess.refresh(foreground: foreground, configured: Set(configuration.active?.apps.map(\.id) ?? []),
@@ -288,8 +302,10 @@ import UniformTypeIdentifiers
         appBlocker.update(apps: configuration.active?.apps ?? [], snapshot: snapshot, allowance: temporaryAccess.grant())
     }
     func openBlockedApp() {
-        guard let app = blockedApp,
-              !AppRules.shouldBlock(bundleID: app.bundleID, apps: configuration.active?.apps ?? [], snapshot: snapshot, allowance: temporaryAccess.grant()),
+        if let app = blockedApp { openGuardedApp(app) }
+    }
+    private func openGuardedApp(_ app: BlockedApp) {
+        guard !AppRules.shouldBlock(bundleID: app.bundleID, apps: configuration.active?.apps ?? [], snapshot: snapshot, allowance: temporaryAccess.grant()),
               let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: app.bundleID) else { return }
         NSWorkspace.shared.openApplication(at: url, configuration: .init()) { _, _ in }
     }

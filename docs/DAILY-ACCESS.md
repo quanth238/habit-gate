@@ -1,124 +1,116 @@
-# Daily app allowance — native 1.5.0
+# Daily app access — native 1.5.1
 
-**Product rule:** 15 minutes per habit day, shared across configured blocked Mac apps. Count foreground use and pause when the user switches away. Settings control the next day's allowance. Chrome remains governed by habit completion.
+Choose **Start access** when you need a blocked Mac app and **End access** when finished. All configured blocked apps share **15 minutes per habit day** by default. Starting again uses the time left; it never creates another 15 minutes.
+
+The main Temporary access page shows the countdown and the current action. Daily-limit controls live in the **Settings** sidebar tab.
 
 ## Feature specification
 
-| ID | Requirement | Implemented behavior |
+| ID | Requirement | Behavior |
 |---|---|---|
-| DA-01 | One daily budget | Default 900 seconds across every app in the permanent Mac app policy. Switching apps never refills it. |
-| DA-02 | Automatic use | Bringing a protected app forward starts counting if habits are incomplete and balance remains. No session setup is required. |
-| DA-03 | Pause | Switching to another app, screen lock or sleep settles the segment and pauses. Background apps do not consume time. |
-| DA-04 | Exhaustion | At zero, revoke the native exception and immediately recheck running apps. Hide windows; preserve processes. |
-| DA-05 | Settings | Presets 5/15/30/60 minutes or custom integer 1–120. Save changes for the next 4 AM reset; preserve today's used time. |
-| DA-06 | Reset | Refill at the existing 4 AM habit-day boundary. Carry no unused time forward. A timezone change does not refill the current saved period early. |
-| DA-07 | Habit completion | Verified normal access pauses allowance accounting and uses the ordinary unlocked state. An undone completion resumes the remaining daily balance. |
-| DA-08 | Browser isolation | No change to GateSnapshot, native browser messages, Chrome permissions, Habitify requests or permanent selections. |
-| DA-09 | Failure | Save before granting foreground access. Unreadable runtime state, a detected clock rollback or storage failure denies the local exception. Habitify network failure alone does not remove the local allowance. |
-| DA-10 | Feedback | Remaining MM:SS, counting/paused/used-up labels, daily limit and reset time in the sidebar page and compact Today card. One-minute warning; system notification only with existing authorization. |
+| DA-01 | Shared daily balance | Default 900 seconds across every app in the permanent Mac app policy. No per-app refill or extra-time button. |
+| DA-02 | Explicit Start | App windows remain protected until Start succeeds. The local ledger must save before access is granted. |
+| DA-03 | Foreground accounting | After Start, count only while a configured app is foreground. Switching away, sleep and screen lock pause usage. |
+| DA-04 | Explicit End | Settle and save used time, revoke the grant and immediately recheck running apps. Hide protected windows without terminating their processes. |
+| DA-05 | Reuse remaining time | Start and End as needed within the same balance. For example, 3 minutes used leaves 12 minutes for later that day. |
+| DA-06 | Exhaustion | At zero, end access automatically. Complete the habits for normal access or wait for the daily reset. |
+| DA-07 | Settings | In Settings, choose 5/15/30/60 minutes or a custom integer 1–120. Changes apply at the next 4 AM reset and never refill today. |
+| DA-08 | Daily reset | Fresh configured balance at 4 AM; access is off until Start is chosen again. A timezone change does not refill the saved period early. |
+| DA-09 | Normal habit unlock | Verified completion ends temporary access and uses ordinary unlocked protection rules. An undone completion requires a new manual Start to use the balance. |
+| DA-10 | Restart and recovery | Restart with access off and retain used time. Configuration problems or a detected clock rollback revoke access. Habitify network failure alone does not consume or remove the local balance. |
+| DA-11 | Browser isolation | No change to GateSnapshot, Chrome messages, browser permissions, Habitify requests or permanent app selections. Websites receive no temporary grant. |
+| DA-12 | Shortcuts | Today has the same Start/End action. A blocked-app shortcut opens the countdown; successful Start opens only the originally requested app once. |
 
-All configured blocked Mac apps share the allowance automatically. It applies only to foreground window access. Notifications, uploads and calls can continue in background after exhaustion. This remains voluntary protection: quitting Habit Gate, changing local files or disabling the browser extension can bypass enforcement.
+Calls and uploads may continue in the background after End or exhaustion. This is voluntary foreground-window protection, not process termination or background network blocking.
 
 ## User flow
 
 ```mermaid
 flowchart TD
-    A[Open a configured Mac app] --> B{Habits verified complete?}
-    B -->|Yes| C[Ordinary access; allowance paused]
-    B -->|No| D{Daily balance available and local state healthy?}
-    D -->|No| E[Hide app windows; show habits and allowance shortcut]
-    D -->|Yes| F[Save foreground segment before allowing access]
-    F --> G[Count foreground seconds from shared balance]
-    G --> H{User switches away or Mac sleeps / locks?}
-    H -->|Yes| I[Settle usage; save; pause balance]
-    I --> A
+    A[Main countdown: remaining daily time] --> B[Start access]
+    B --> C{Balance and local state valid?}
+    C -->|No| D[Keep apps blocked; explain the problem]
+    C -->|Yes| E[Save ledger and enable app access]
+    E --> F[Open a configured blocked app]
+    F --> G[Count foreground use from the shared balance]
+    G --> H{Switch away, sleep or lock?}
+    H -->|Yes| I[Save elapsed use and pause]
+    I --> F
     H -->|No| J{Balance reaches zero?}
     J -->|No| G
-    J -->|Yes| E
-    K[4 AM reset] --> L[Apply saved daily limit and fresh balance]
-    L --> D
+    J -->|Yes| K[End access; hide protected windows]
+    E --> L[End access when finished]
+    G --> L
+    L --> M[Save used time; hide protected windows]
+    M --> A
+    N[4 AM reset] --> O[Fresh balance; access off]
+    O --> A
 ```
 
-Example: two minutes in Telegram, one minute in Zalo and twelve minutes in Discord exhaust a 15-minute allowance. Time in Finder, a meeting in another unconfigured app, or a sleeping Mac does not reduce it. Reopening a protected app uses the same remaining time.
+Example: Start, use Telegram for two minutes and Zalo for one minute, then End. The countdown has 12 minutes left. Starting later resumes that same 12-minute balance. Time in Finder or another unconfigured app does not reduce it.
 
 ## Engineering design
 
 ```mermaid
 flowchart LR
-    W[NSWorkspace foreground / sleep / lock events] --> S[GateStore]
-    S --> D[DailyAccessController]
+    UI[Countdown Start / End] --> D[DailyAccessController]
+    W[Workspace foreground / sleep / lock events] --> S[GateStore]
+    S --> D
     D <--> F[Owner-only atomic daily-access.json]
-    D --> G[Ephemeral AppAccessGrant]
+    D --> G[Ephemeral native AppAccessGrant]
     G --> A[AppBlocker / AppRules]
     H[Habitify GET requests] --> P[Normal habit policy / GateSnapshot]
     P --> A
     P --> B[Chrome bridge and extension 1.1.1]
-    D --> U[Sidebar and compact Today card]
+    Settings[Settings: next-day allowance] --> D
 ```
 
-`DailyAccessBudget` is the persisted ledger: configured limit, today's limit, used seconds, habit date, reset deadline, saved time, and an optional unfinished foreground segment. It contains no API key, chat contents, browser history or per-app usage history. UTC instants are stored as numeric epoch milliseconds. A unique mode-0600 temporary file is written and synchronized before an atomic rename. Existing installations initialize a 15-minute ledger; malformed existing data initializes an exhausted day. Missing or changed data detected while running exhausts the current day's balance.
+`DailyAccessBudget` persists the configured limit, today's limit, used seconds, habit date, fixed reset deadline, saved time and an optional unfinished foreground segment. The manual `accessStarted` flag is in memory only and defaults to false on launch. End does not reset the ledger.
 
-`DailyAccessController` accounts with `mach_continuous_time`. Workspace events settle and persist transitions; one scheduled exhaustion action revokes access at the deadline. There are no per-second disk writes or fast process scans. A visible running countdown can update once per second; a paused countdown has no periodic UI schedule. The existing five-second housekeeping pass verifies local state and updates whole-minute menu-bar labels.
+The file contains no API key, chat contents, browser history or per-app usage history. UTC instants use numeric epoch milliseconds. A unique mode-0600 temporary file is synchronized before an atomic rename. Existing installations initialize a 15-minute ledger. Malformed existing data initializes an exhausted day; missing or changed data detected while running also exhausts the current balance.
 
-Foreground transitions are accounted for **before** AppBlocker enforces that event. All initial scans, activation handling and delayed hide verification consult the same optional native grant. Policy additions/removals and habit selection retain their existing rules.
+Foreground accounting uses `mach_continuous_time`. Transitions save elapsed usage; one scheduled exhaustion action revokes access at the deadline. A running visible countdown can update once per second; a paused countdown has no periodic UI schedule. There are no per-second disk writes or fast process scans. The existing five-second housekeeping pass verifies state and updates whole-minute menu-bar labels.
 
-Normal sleep and lock events pause the ledger before time away. A clean app exit settles the segment. If the guard crashes or is killed during foreground use, the persisted unfinished segment is charged conservatively through restart within that habit day; unobserved time may therefore be charged. A new habit day still begins with its configured allowance. This avoids restoring free time by restarting the guard. Manual system clock manipulation and removal of local files are outside tamper-resistant enforcement.
+Workspace transitions are accounted for before enforcement. Initial scans, activation handling and delayed hide verification all consult the same native grant. Start cancels pending hides for exempted apps; End scans running apps immediately. Permanent target and habit rules are unchanged.
 
-The saved reset deadline stays fixed during a timezone change; when that deadline passes, the next period uses the current local 4 AM boundary. This avoids an immediate extra allowance from switching timezones. Settings display the balance separately from the configured next-day limit.
+Normal sleep and lock events pause accounting. Clean exit settles use; launch always requires Start again. If the guard crashes or is killed during foreground use, the unfinished segment is conservatively charged through restart within that habit day. A new day begins with its configured balance. Manual system-clock manipulation and removal of local files are outside tamper-resistant enforcement.
+
+The saved reset deadline stays fixed during a timezone change. At that deadline, the next period uses the current local 4 AM boundary. This avoids an immediate extra allowance from changing timezones.
 
 ## Interface and accessibility
 
-The Temporary access sidebar page shows the shared balance first, its paused/counting state, then the daily-limit setting and the real installed icons for the protected apps. There are no Start, End or extra-time actions. The Today panel uses a compact allowance card and habit progress summary to stay short. The blocked-app notice links to the allowance setting when the balance is exhausted.
+The app opens its countdown page after setup. It shows large monospaced timer digits, a Ready/Counting/Paused/Used-up label, the daily limit and reset time, one Start or End action, and the real icons of protected apps. The settings shortcut opens the Settings tab, where allowance editing sits above login and notification preferences.
 
-The interface retains the shield identity, blue actions, system fonts, explicit text states, monospaced timer digits and automatic light/dark colors. Presets and saving are native keyboard-accessible buttons; the custom field has an explicit accessibility label. No flashing or decorative timer animation is used.
+The Today panel keeps a compact timer and the same action. The blocked-app notice links to the countdown. Blue actions, adaptive light/dark surfaces, system fonts and explicit text labels follow the existing native design. Settings retain Command-S saving and explicit custom-input labels. No flashing or decorative timer animation is used.
 
-Screenshots and measured validation are recorded below and in `validation/daily-access-1.5.0.json`. Preview fixtures contain illustrative balances and do not read credentials or personal habits.
+## Validation — 1.5.1, 21 October 2026
+
+**87 Swift tests and 20 Chrome tests passed.** The new manual-flow test verifies that opening an app before Start grants nothing, End preserves remaining time, repeated Start does not refill the balance, and exhaustion prevents another grant. Existing tests cover scope, pause/resume, invalid input, persistence failures, restart, sleep/lock suspension, clock rollback, timezone changes, reset, habit completion and snapshot isolation.
+
+The controlled native fixture was rerun with manual Start. A visible disposable window remained available during a five-second remaining balance, then received exactly one real macOS hide call. Its process survived and repeated refreshes produced no duplicate notice. Foreground signals were simulated so the test did not require controlling the user's desktop focus. Physical clock/sleep changes were modeled rather than applied to this Mac.
+
+On the installed app, Start changed the action to End and enabled access; End returned it to Start with the unused balance unchanged. The countdown's settings shortcut opened Settings, where duration controls were visible. Launch at login remained enabled. Used time and permanent configuration were preserved across installation, and Habitify synced successfully. Chrome remains 1.1.1, with no browser-source or protocol changes.
+
+The main countdown was checked in an 880 × 680 layout fixture. Actual installed screenshots are below. Machine-readable evidence is in `validation/manual-access-1.5.1.json`.
+
+### Installed screenshots
+
+![Countdown ready](../design/temporary-access/manual/installed-countdown-dark.png)
+
+| Access enabled | Settings |
+|---|---|
+| ![End access](../design/temporary-access/manual/installed-active-dark.png) | ![Allowance in Settings](../design/temporary-access/manual/installed-settings-dark.png) |
+
+### Performance limits
+
+The earlier 1.5.0 warm closed-window sample measured **0.673% CPU and 108.16 MB mean RSS**, exceeding the original <0.5% / <100 MB targets. See `validation/daily-access-1.5.0.json` for sample conditions and earlier results. This 1.5.1 flow/layout update has not been benchmarked separately; no performance improvement is claimed.
 
 ## Rollback
 
-Local app and support-state backups were made outside the public repository before installation. Run:
+App and private state backups are stored outside the public repository. Run:
 
 ```sh
 ./scripts/rollback-daily-access.sh '/full/path/to/backed-up/Habit Gate.app'
 ```
 
-The script stops Habit Gate, moves its allowance ledger aside and restores the prior signed app. It retains Habitify rules, Keychain data, login registration and the Chrome extension. Open the restored app from Applications. The older app has no daily exception, so ordinary habit protection resumes.
-
-## Validation on 21 October 2026
-
-**86 Swift tests and 20 Chrome tests passed.** Release compilation, installed signature verification, native messaging framing/origin rejection and rollback-script syntax checks passed. The installed signed binary matches `dist`. The original permanent configuration is byte-for-byte unchanged. Launch at login remains enabled. After the user approved the newly signed build's Keychain request, Habitify sync succeeded and the normal website snapshot remained blocked.
-
-Automated coverage includes shared app scope, foreground/pause transitions, switching protected apps without refilling, exact exhaustion, input bounds, failed writes and retry, restart with an unfinished segment, sleep/lock suspension, recovery, offline availability, normal habit unlock, 03:59→04:00, timezone changes, clock rollback, malformed/missing runtime data and absence of per-second writes. Tests also verify that allowance use does not modify permanent rules or GateSnapshot.
-
-The native integration fixture began with a visible disposable app and **five seconds remaining in a one-minute ledger**. A controlled foreground-accounting signal drove the real controller and AppBlocker. The window remained visible during the grant, then received exactly one real macOS hide call at exhaustion. Its process survived, the grant was revoked, and repeated refreshes produced no duplicate notice. This fixture does not inspect chats or alter real Habitify habits. Workspace event ordering is tested separately with fake guarded apps.
-
-In the production app, the 15-minute balance was consumed across app use and then remained paused; reinstall/restart preserved used time. The installed screenshot shows the remaining balance, not a fresh mock timer. Minimum-size light/dark fixtures confirmed all five icons and essential controls fit **880 × 680**. Invalid 0-minute input disables saving; 120 is accepted. Command-S saved a next-day preference in an isolated fixture while today's balance stayed at 15 minutes.
-
-A fresh Chrome report confirmed configured-site permissions and rules ready, with private mode off. A new navigation test could not be inspected because the browser's URL policy rejected the resulting protocol. Blocked-page content was therefore not reverified through automation. Extension source/version, browser messages, GateSnapshot schema and Habitify requests are unchanged.
-
-Physical sleep/lock and clock/timezone changes were modeled rather than interrupting this Mac's work or changing its system clock. A full 15-minute real-app exhaustion run was replaced by the controlled native fixture above.
-
-### Performance evidence
-
-Each sample lasted about 65 seconds and measured native-process CPU and resident memory, excluding the browser. RSS includes shared/reclaimable pages and is not the same as macOS physical footprint.
-
-| State | CPU, average % of one core | Mean RSS |
-|---|---:|---:|
-| Previous 1.4.5, closed window | 0.229% | 38.98 MB |
-| Initial 1.5.0, closed window | 0.337% | 38.71 MB |
-| Final build, warm visible window after Keychain approval | 0.933% | 120.16 MB |
-| Final build, warm closed window | 0.673% | 108.16 MB |
-
-**The original <0.5% idle CPU / <100 MB native RSS targets are not met across the final warm samples.** The samples include different warm-up, window and authentication activity, so they do not isolate the allowance timer's cost. There is no per-second disk writing or background countdown redraw while paused. Further performance work should compare equally warmed builds before choosing an optimization.
-
-### Screenshots
-
-Installed app, with live connection and preserved daily balance:
-
-![Installed daily allowance](../design/temporary-access/installed-daily-allowance-dark.png)
-
-Minimum-size layout fixtures (illustrative balance; no credentials loaded):
-
-| Dark | Light |
-|---|---|
-| ![Dark at 880 by 680](../design/temporary-access/preview-daily-dark-880x680.png) | ![Light at 880 by 680](../design/temporary-access/preview-daily-light-880x680.png) |
+The script stops the current app and restores the previous signed app while retaining the daily ledger, permanent rules, Keychain data, login registration and Chrome extension. Keeping the ledger prevents rollback from refilling spent time in an older allowance-capable version. The prior version's own access behavior applies after reopening it from Applications.

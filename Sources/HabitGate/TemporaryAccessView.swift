@@ -6,13 +6,32 @@ private typealias AccessState<Value> = SwiftUI.State<Value>
 struct TemporaryAccessView: View {
     @ObservedObject var store: GateStore
     @ObservedObject var access: DailyAccessController
+    var body: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            DailyAccessCard(store: store, access: access)
+            HStack(spacing: 9) {
+                ForEach(store.configuration.active?.apps ?? []) { app in
+                    MacAppIcon(app: app).help(app.name).accessibilityHidden(false).accessibilityLabel(app.name)
+                }
+                Spacer(minLength: 0)
+                Label("Websites stay protected", systemImage: "lock.shield")
+                    .font(.system(size: 10)).foregroundStyle(.secondary)
+            }
+            Button { store.requestTemporaryAccess(settings: true) } label: {
+                Label("Daily allowance settings", systemImage: "gearshape")
+            }.buttonStyle(.plain).font(.system(size: 11, weight: .medium)).foregroundStyle(GateTheme.blue)
+        }.onDisappear { store.pendingAccessApp = nil }
+    }
+}
+
+struct DailyAccessSettingsView: View {
+    @ObservedObject var store: GateStore
+    @ObservedObject var access: DailyAccessController
     @AccessState private var duration = 15
     @AccessState private var custom = "15"
     private var minutes: Int? { duration == 0 ? DailyAccessBudget.minutes(custom) : duration }
-    private var apps: [BlockedApp] { store.configuration.active?.apps ?? [] }
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            DailyAccessCard(store: store, access: access)
             GateCard(padding: 16) {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
@@ -47,15 +66,9 @@ struct TemporaryAccessView: View {
                     }
                 }
             }
-            HStack(spacing: 9) {
-                ForEach(apps) { app in
-                    MacAppIcon(app: app).help(app.name).accessibilityHidden(false).accessibilityLabel(app.name)
-                }
-                Spacer(minLength: 0)
-                Label("Websites stay protected", systemImage: "lock.shield")
-                    .font(.system(size: 10)).foregroundStyle(.secondary)
+            if !access.notice.isEmpty {
+                Text(access.notice).font(.system(size: 10)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }
-            if !access.notice.isEmpty { Text(access.notice).font(.system(size: 10)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true) }
         }.onAppear {
             let limit = access.budget.limitMinutes
             duration = [5, 15, 30, 60].contains(limit) ? limit : 0; custom = String(limit)
@@ -71,18 +84,19 @@ struct DailyAccessCard: View {
         if store.normalAccess { return "Essentials complete · apps unlocked" }
         if !access.issue.isEmpty || store.needsRecovery { return "Allowance locked · needs attention" }
         if access.remaining <= 0 { return "Daily allowance used up" }
-        return access.isCounting ? "Counting foreground use" : "Paused · ready when you need it"
+        if !access.accessStarted { return "Ready when you need it" }
+        return access.isCounting ? "Counting foreground use" : "Access on · paused until you use an app"
     }
     var body: some View {
-        GateCard(padding: compact ? 14 : 16) {
-            VStack(alignment: .leading, spacing: compact ? 8 : 10) {
+        GateCard(padding: compact ? 14 : 20) {
+            VStack(alignment: .leading, spacing: compact ? 8 : 16) {
                 HStack {
                     Label("Today’s app allowance", systemImage: "timer")
                         .font(.system(size: 12, weight: .semibold)).foregroundStyle(GateTheme.blue)
                     Spacer()
                     Text("\(access.budget.todayMinutes) min / day").font(.system(size: 10)).foregroundStyle(.secondary)
                     if compact {
-                        Button { store.requestTemporaryAccess() } label: { Image(systemName: "gearshape") }
+                        Button { store.requestTemporaryAccess(settings: true) } label: { Image(systemName: "gearshape") }
                             .buttonStyle(.plain).accessibilityLabel("Configure daily allowance")
                     }
                 }
@@ -93,8 +107,18 @@ struct DailyAccessCard: View {
                     Text("One minute or less left today").font(.system(size: 10, weight: .medium)).foregroundStyle(.orange)
                 }
                 if !compact {
-                    Text("Open any blocked Mac app to use this balance. Switch away and the timer pauses. When it runs out, app windows hide; background work may continue.")
-                        .font(.system(size: 11)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                    Text(access.accessStarted ? "Switching away pauses your time. End access when you’re done." : "Start when you need access. Only foreground app use counts.")
+                        .font(.system(size: 11)).foregroundStyle(.secondary).frame(maxWidth: .infinity)
+                }
+                if access.accessStarted {
+                    Button { access.endAccess() } label: {
+                        Text("End access").frame(maxWidth: .infinity)
+                    }.buttonStyle(GateButtonStyle(primary: true))
+                } else {
+                    Button { store.startDailyAccess() } label: {
+                        Text("Start access").frame(maxWidth: .infinity)
+                    }.buttonStyle(GateButtonStyle(primary: true))
+                        .disabled(!access.canStart || store.normalAccess || store.needsRecovery)
                 }
                 if !access.issue.isEmpty {
                     Text(access.issue).font(.system(size: 10)).foregroundStyle(.orange).fixedSize(horizontal: false, vertical: true)
@@ -105,18 +129,29 @@ struct DailyAccessCard: View {
             }
         }
     }
-    private var countdown: some View {
+    @ViewBuilder private var countdown: some View {
         let seconds = max(0, Int(ceil(access.remaining)))
-        return HStack(alignment: .center, spacing: 16) {
-            Text(String(format: "%02d:%02d", seconds / 60, seconds % 60))
-                .font(.system(size: compact ? 29 : 48, weight: .semibold, design: .rounded)).monospacedDigit()
-                .accessibilityLabel("\(seconds / 60) minutes \(seconds % 60) seconds left today")
-            VStack(alignment: .leading, spacing: 5) {
-                Text(state).font(.system(size: 11, weight: .medium))
-                Text("Remaining today · resets at \(access.budget.resetsAt.formatted(date: .omitted, time: .shortened))").font(.system(size: 10)).foregroundStyle(.secondary)
+        let digits = String(format: "%02d:%02d", seconds / 60, seconds % 60)
+        if compact {
+            HStack(alignment: .center, spacing: 16) {
+                Text(digits).font(.system(size: 29, weight: .semibold, design: .rounded)).monospacedDigit()
+                    .accessibilityLabel("\(seconds / 60) minutes \(seconds % 60) seconds left today")
+                countdownStatus
+                Spacer(minLength: 0)
             }
-            Spacer(minLength: 0)
+        } else {
+            VStack(spacing: 12) {
+                Text(digits).font(.system(size: 76, weight: .semibold, design: .rounded)).monospacedDigit()
+                    .tracking(-2).accessibilityLabel("\(seconds / 60) minutes \(seconds % 60) seconds left today")
+                countdownStatus
+            }.frame(maxWidth: .infinity).padding(.vertical, 8)
         }
     }
-
+    private var countdownStatus: some View {
+        VStack(alignment: compact ? .leading : .center, spacing: 5) {
+            Text(state).font(.system(size: 12, weight: .medium))
+            Text("Remaining today · resets at \(access.budget.resetsAt.formatted(date: .omitted, time: .shortened))")
+                .font(.system(size: 10)).foregroundStyle(.secondary)
+        }
+    }
 }
