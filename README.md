@@ -2,7 +2,7 @@
 
 A native SwiftUI menu-bar app plus a Chrome Manifest V3 extension. Your selected websites and Mac apps remain gated until all selected daily Habitify habits due on the active habit date are complete. A shared daily foreground-use allowance provides brief access to blocked Mac apps; websites keep their normal habit rules.
 
-**Current alpha: macOS 1.5.1 (17), Chrome extension 1.1.1.** The [daily allowance specification](docs/DAILY-ACCESS.md) describes this version. The [earlier implementation review](docs/UI-UX-REVIEW.md) records previous UI and reliability work. `VALIDATION.md` is a chronological record; its older version sections describe historical builds.
+**Current alpha: macOS 1.5.5 (21), Chrome extension 1.1.1.** The [daily allowance specification](docs/DAILY-ACCESS.md) describes this version. The [earlier implementation review](docs/UI-UX-REVIEW.md) records previous UI and reliability work. `VALIDATION.md` is a chronological record; its older version sections describe historical builds.
 
 ![Midnight Blue blocked-page preview](design/midnight-blue/laptop-1280x640.png)
 
@@ -179,3 +179,10 @@ The native implementation uses SwiftUI shapes and text. Daily counting, app enfo
 The Temporary access page now uses its available width, supports the native green full-screen button and offers a header action with Control-Command-F. The main window remembers its frame and initially fills the screen's visible area. The clock stays between 220 and 340 points; timer digits, action, caption, app icons and reset metadata form one centered group with balanced space above and below. Large windows retain readable proportions. Login still starts quietly in the menu bar.
 
 All 91 Swift tests pass. Daily accounting, enforcement, Chrome 1.1.1 and permanent policy are unchanged. See [screenshots and layout notes](design/temporary-access/responsive/README.md) and [validation](validation/responsive-access-1.5.4.json).
+
+
+## Saved interface size · 1.5.5
+
+Settings → Interface size offers Compact (90%), Standard (100%, default), and Large (110%). The selected scale is saved immediately and stays fixed across displays and app restarts. Window resizing and full screen still work; the minimum window grows when a larger preset needs room. Main content reflows and scrolls within that window.
+
+Appearance uses a separate local preference. Protection rules, the daily balance, the menu-bar popup, blocked-app dialog and Chrome 1.1.1 are unchanged. All 91 Swift tests pass. See the [display checks and screenshots](design/interface-size/README.md) and [validation](validation/interface-size-1.5.5.json).

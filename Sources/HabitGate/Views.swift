@@ -151,6 +151,7 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
 
 struct SettingsView: View {
     @ObservedObject var store: GateStore
+    @ObservedObject var interface: InterfacePreferences
     @LocalState private var apiKey = ""
     @LocalState private var selection = Set<String>()
     @LocalState private var domains = ""
@@ -215,7 +216,7 @@ struct SettingsView: View {
                 footer
             }.background(GateTheme.canvas)
         }.background(GateTheme.canvas.ignoresSafeArea())
-            .tint(GateTheme.blue).frame(minWidth: 880, idealWidth: 980, minHeight: 648, idealHeight: 748)
+            .tint(GateTheme.blue).frame(maxWidth: .infinity, maxHeight: .infinity)
              .onAppear {
                  loadDraft()
                  if store.temporaryAccessRequest != nil { page = store.temporaryAccessOpensSettings ? .preferences : .temporary; store.temporaryAccessRequest = nil }
@@ -477,6 +478,7 @@ struct SettingsView: View {
     }
     private var preferences: some View {
         VStack(alignment: .leading, spacing: 17) {
+            InterfaceSizeSettingsView(interface: interface)
             DailyAccessSettingsView(store: store, access: store.temporaryAccess)
             GateCard {
                 VStack(alignment: .leading, spacing: 18) {

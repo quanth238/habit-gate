@@ -27,6 +27,7 @@ import Darwin
     private let popover = NSPopover()
     private var settingsWindow: NSWindow?
     private var blockedAppWindow: NSWindow?
+    private let interface = InterfacePreferences()
     private var started = false
     func applicationDidFinishLaunching(_ notification: Notification) {
         startIfNeeded()
@@ -44,6 +45,7 @@ import Darwin
         store.statusChanged = { [weak self] in self?.updateStatus() }
         store.showBlockedApp = { [weak self] in self?.openBlockedApp() }
         store.dismissBlockedApp = { [weak self] in self?.blockedAppWindow?.close() }
+        interface.didChange = { [weak self] in self?.updateInterfaceMinimum() }
         store.start(); updateStatus()
         if store.configuration.active == nil { openSettings() }
     }
@@ -77,15 +79,26 @@ import Darwin
             window.titleVisibility = .hidden; window.titlebarAppearsTransparent = true
             window.toolbarStyle = .unified
             window.collectionBehavior = [.fullScreenPrimary, .fullScreenAllowsTiling]
-            window.contentView = NSHostingView(rootView: SettingsView(store: store))
-            window.minSize = NSSize(width: 880, height: 680)
+            let hosting = NSHostingView(rootView: MainWindowView(store: store, interface: interface))
+            hosting.sizingOptions = [] // The window owns sizing; zoom must not change its intrinsic size.
+            window.contentView = hosting
             if !window.setFrameUsingName("HabitGateMainWindow"), let screen = window.screen ?? NSScreen.main {
                 window.setFrame(screen.visibleFrame, display: false)
             }
             window.setFrameAutosaveName("HabitGateMainWindow")
             settingsWindow = window
         }
-        settingsWindow?.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
+        settingsWindow?.makeKeyAndOrderFront(nil)
+        updateInterfaceMinimum()
+        NSApp.activate(ignoringOtherApps: true)
+    }
+    private func updateInterfaceMinimum() {
+        guard let window = settingsWindow else { return }
+        window.applyInterfaceSize(interface.size)
+    }
+    func windowDidChangeScreen(_ notification: Notification) {
+        guard notification.object as? NSWindow === settingsWindow else { return }
+        updateInterfaceMinimum()
     }
     private func openBlockedApp() {
         // A visible notice can be behind the app that just launched. Raise it

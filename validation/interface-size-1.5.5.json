@@ -1,0 +1,98 @@
+{
+  "date": "2026-10-21",
+  "nativeVersion": "1.5.5",
+  "nativeBuild": 21,
+  "chromeVersion": "1.1.1",
+  "scope": "Saved main-window appearance; no policy, accounting, API or browser changes.",
+  "presets": {
+    "compact": 0.9,
+    "standard": 1.0,
+    "large": 1.1
+  },
+  "defaultPreset": "standard",
+  "checks": {
+    "swiftTestsPassed": 91,
+    "releaseBuildPassed": true,
+    "signatureAndNativeHostPassed": true,
+    "installedMatchesDist": true,
+    "permanentConfigurationPreserved": true,
+    "usedSecondsPreserved": true,
+    "dailyLimitsPreserved": true,
+    "ledgerOnlyChangeDuringUpdate": [
+      "savedAt"
+    ],
+    "launchAtLoginStillEnabled": true,
+    "installedStandardDefaultVisible": true,
+    "installedSettingsVisible": true,
+    "allPresetControlsExercisedInPreview": true,
+    "settingsNavigationPreservedOnSizeChange": true,
+    "presetRestoredAfterPreviewRestart": true,
+    "fullScreenSizeChangeKeepsWindowFrame": true,
+    "configurationAndDailyLedgerNotUsedForAppearance": true,
+    "newPollingTimers": 0,
+    "installedSync": "Verified at 23:14 after final installation; no Keychain approval required.",
+    "largeMinimumFrameTimerControlsVisible": true
+  },
+  "displays": [
+    {
+      "name": "PA248QV",
+      "mode": "1920x1200",
+      "backingScale": 1,
+      "appearance": "dark"
+    },
+    {
+      "name": "Built-in Retina Display",
+      "mode": "1512x982 points",
+      "backingScale": 2,
+      "previewWindowPoints": [
+        1100,
+        800
+      ],
+      "appearance": "light",
+      "restoredPreset": "large"
+    }
+  ],
+  "limitations": [
+    "macOS display scaling controls physical size and Retina pixel density.",
+    "Existing responsive content can reflow within the fixed preset.",
+    "No new CPU or memory benchmark.",
+    "No complete VoiceOver audit.",
+    "Browser tests were not rerun because browser implementation is unchanged."
+  ],
+  "screenshots": {
+    "design/interface-size/compact-settings.jpg": [
+      969,
+      762
+    ],
+    "design/interface-size/large-external-settings.jpg": [
+      1920,
+      1200
+    ],
+    "design/interface-size/large-minimum.jpg": [
+      1938,
+      1498
+    ],
+    "design/interface-size/large-retina-light.jpg": [
+      2200,
+      1600
+    ],
+    "design/interface-size/standard-external-fullscreen.jpg": [
+      1920,
+      1200
+    ]
+  },
+  "minimumWindowPoints": {
+    "compact": [
+      792,
+      612
+    ],
+    "standard": [
+      880,
+      680
+    ],
+    "large": [
+      968,
+      748
+    ]
+  }
+}

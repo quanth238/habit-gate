@@ -1,4 +1,4 @@
-# Daily app access — native 1.5.4
+# Daily app access — native 1.5.5
 
 Choose **Start access** when you need a blocked Mac app and **End access** when finished. All configured blocked apps share **15 minutes per habit day** by default. Starting again uses the time left; it never creates another 15 minutes.
 
@@ -75,7 +75,7 @@ The saved reset deadline stays fixed during a timezone change. At that deadline,
 
 ## Interface and accessibility
 
-The app opens its countdown page after setup. The interface uses an open canvas, a thin clock dial with subtle ticks, tabular timer digits and one compact Start or End action. Ready, Access on and Time used today labels accompany the visual state. A header chip shows the daily limit; centered app icons and metadata show coverage, reset time and the settings shortcut. Settings retains allowance editing above login and notification preferences. The 1.5.4 layout centers the entire interaction group with balanced surrounding space and bounds the clock to 220–340 points. Minimum 880 × 680 and full-screen layouts keep the controls at readable proportions. The main window remembers its frame and initially fills the screen's visible area; login startup remains quiet.
+The app opens its countdown page after setup. The interface uses an open canvas, a thin clock dial with subtle ticks, tabular timer digits and one compact Start or End action. Ready, Access on and Time used today labels accompany the visual state. A header chip shows the daily limit; centered app icons and metadata show coverage, reset time and the settings shortcut. Settings places Interface size first, followed by allowance editing, login and notification preferences. The 1.5.4 layout centers the entire interaction group with balanced surrounding space and bounds the clock to 220–340 points. Minimum 880 × 680 and full-screen layouts keep the controls at readable proportions. The main window remembers its frame and initially fills the screen's visible area; login startup remains quiet.
 
 The Today panel keeps a compact timer and the same action. The blocked-app notice links to the countdown. Blue actions, adaptive light/dark surfaces, system fonts and explicit text labels follow the existing native design. Settings retain Command-S saving and explicit custom-input labels. The ring updates without flashing or animation. Its numeric balance is available to accessibility tools, and all actions are native keyboard-accessible buttons. The design keeps Settings separate from daily Start/End use.
 
@@ -87,7 +87,15 @@ The controlled native fixture uses an isolated five-second balance and a disposa
 
 Installed-app and screenshot evidence: `validation/continuous-access-1.5.2.json`. Earlier foreground-counting behavior and screenshots are historical in `validation/manual-access-1.5.1.json`; version 1.5.2 supersedes that accounting rule. Chrome remains 1.1.1 and receives no temporary grant.
 
-### Current interface
+### Saved interface size — 1.5.5
+
+Settings → Interface size offers Compact (90%), Standard (100%, default), and Large (110%). Selection applies immediately and persists across restarts in a separate local appearance preference. It stays fixed when moving between displays; no extra lock switch is needed. The preset scales the main window’s text, icons, controls and spacing together. The menu-bar popup and blocking dialog retain their existing sizes.
+
+The window still resizes and supports full screen. Recommended minimum window sizes are 792 × 612, 880 × 680 and 968 × 748 points respectively, capped to the current screen’s visible area. Switching to a smaller preset preserves a larger window. Content reflows or scrolls as needed; scaling does not crop the footer or overlap controls. macOS still controls Retina pixel density and system display scaling, so this does not promise identical physical millimeters on different monitors.
+
+The appearance controller has no reference to habit policy, API credentials, daily accounting or browser messages. Its event-driven updates introduce no polling or disk writes during idle time. See [screenshots and display checks](../design/interface-size/README.md) and [validation](../validation/interface-size-1.5.5.json). All 91 existing Swift tests pass; no new performance benchmark is claimed.
+
+### Earlier interface evidence
 
 ![Installed full-screen countdown](../design/temporary-access/responsive/installed-fullscreen.jpg)
 
@@ -97,7 +105,7 @@ The redesign follows a [generated concept and exact prompt](../design/temporary-
 
 ### Performance limits
 
-The earlier 1.5.0 warm closed-window sample measured **0.673% CPU and 108.16 MB mean RSS**, exceeding the original <0.5% / <100 MB targets. See `validation/daily-access-1.5.0.json` for sample conditions and earlier results. The 1.5.2–1.5.4 flow/layout updates have not been benchmarked separately; no performance improvement is claimed.
+The earlier 1.5.0 warm closed-window sample measured **0.673% CPU and 108.16 MB mean RSS**, exceeding the original <0.5% / <100 MB targets. See `validation/daily-access-1.5.0.json` for sample conditions and earlier results. The 1.5.2–1.5.5 flow/layout updates have not been benchmarked separately; no performance improvement is claimed.
 
 ## Rollback
 
