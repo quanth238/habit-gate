@@ -1,0 +1,92 @@
+{
+  "date": "2026-10-21",
+  "nativeVersion": "1.5.0",
+  "nativeBuild": 16,
+  "chromeVersion": "1.1.1",
+  "approvedBehavior": {
+    "sharedDailyMinutes": 15,
+    "counts": "configured Mac app foreground time only",
+    "pauseOnSwitchAway": true,
+    "reset": "4 AM",
+    "settingsChanges": "next reset; no refill today",
+    "websiteBypass": false
+  },
+  "automatedTests": {
+    "swift": 86,
+    "chrome": 20,
+    "result": "passed"
+  },
+  "installed": {
+    "signedBundleVerified": true,
+    "configurationUnchanged": true,
+    "signedDistMatchesInstalled": true,
+    "launchAtLogin": "enabled; inspected in installed Preferences",
+    "habitifySyncedAt": "2026-10-21T14:14:11Z",
+    "habitifySyncError": null,
+    "normalSnapshotAccess": "blocked"
+  },
+  "nativeIntegration": {
+    "checks": {
+      "foreground_timer_started": true,
+      "grant_revoked": true,
+      "hide_called_once": true,
+      "no_duplicate_notice": true,
+      "process_preserved": true,
+      "shared_minute_exhausted": true,
+      "window_hidden": true,
+      "window_was_visible_during_grant": true
+    },
+    "error": "",
+    "notices": 0,
+    "passed": true,
+    "simulated_foreground": true
+  },
+  "ui": {
+    "minimumWindow": "880 x 680",
+    "lightAndDark": "preview fixtures use production views; all five icons and essential controls fit",
+    "customInput": "0 rejected; 120 accepted",
+    "keyboard": "Command-S saved a 5-minute next-day preference in an isolated fixture; today remained 15 minutes",
+    "installedScreenshot": "design/temporary-access/installed-daily-allowance-dark.png"
+  },
+  "performance": {
+    "baselineClosed": {
+      "nativeAverageCPUPercentOfOneCore": 0.229,
+      "meanRSS_MB": 38.98,
+      "seconds": 65.63
+    },
+    "initialClosed": {
+      "seconds": 65.2,
+      "nativeAverageCPUPercentOfOneCore": 0.337,
+      "meanRSS_MB": 38.71,
+      "maxRSS_MB": 44.79,
+      "sampleCount": 63
+    },
+    "finalWarmVisiblePaused": {
+      "seconds": 65.35,
+      "nativeAverageCPUPercentOfOneCore": 0.933,
+      "meanRSS_MB": 120.16,
+      "maxRSS_MB": 124.63,
+      "sampleCount": 63
+    },
+    "finalWarmClosed": {
+      "seconds": 65.34,
+      "nativeAverageCPUPercentOfOneCore": 0.673,
+      "meanRSS_MB": 108.16,
+      "maxRSS_MB": 114.74,
+      "sampleCount": 63
+    },
+    "targetsMetAcrossWarmMeasurements": false,
+    "notes": "Native process CPU/RSS samples exclude browser. Final warm closed exceeds the original 0.5% CPU and 100 MB RSS targets. Samples differ in warm-up/UI/authentication activity; this does not isolate timer cost."
+  },
+  "coverageLimits": [
+    "Physical sleep, screen lock, clock changes and a full real-day allowance were modeled in automated tests rather than changing this Mac's clock or interrupting work.",
+    "Native OS hide integration used a visible disposable app with a simulated foreground accounting signal and five seconds remaining.",
+    "A new Chrome navigation could not be inspected because browser URL policy refused the resulting protocol; existing fresh extension diagnostics reported permissions and rules ready. Browser source, bridge and snapshot schema are unchanged."
+  ],
+  "privacy": {
+    "apiKeyInBrowser": false,
+    "secretsInNewSourceDocs": false,
+    "personalRuntimeFilesCommitted": false
+  },
+  "rollback": "scripts/rollback-daily-access.sh; private app/settings backup kept outside repository"
+}

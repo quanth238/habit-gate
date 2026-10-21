@@ -21,6 +21,8 @@ import UniformTypeIdentifiers
     @Published var storageIssue = ""
     @Published var guardedAppIDs = Set<String>()
     @Published private(set) var needsRecovery = false
+    let temporaryAccess: DailyAccessController
+    @Published var temporaryAccessRequest: UUID?
     let root: URL
     var showToday: (() -> Void)?
     var showSettings: (() -> Void)?
@@ -31,6 +33,9 @@ import UniformTypeIdentifiers
     private var key: String? { credentials.key }
     var isLoadingCredentials: Bool { credentialState == .loading || credentialState == .idle }
     var credentialNotice: String? { credentialState.notice }
+    private var usageSuspended = false
+    private var sessionLocked = false
+    private var lockObservers: [NSObjectProtocol] = []
     private var timer: Timer?
     private var monitor = NWPathMonitor()
     private var lastAttempt = Date.distantPast
@@ -42,6 +47,7 @@ import UniformTypeIdentifiers
     private var refreshObserver: NSObjectProtocol?
     init(root: URL = GateFiles.root, vault: any CredentialStorage = KeychainVault()) {
         self.root = root
+        temporaryAccess = DailyAccessController(root: root)
         credentials = CredentialSession(storage: vault)
         let loaded = ConfigurationRepository.load(root: root)
         configuration = loaded.configuration
@@ -57,6 +63,12 @@ import UniformTypeIdentifiers
         if configuration.disconnected == true { credentialState = .disconnected }
     }
     func start() {
+        temporaryAccess.onChange = { [weak self] in
+            guard let self else { return }
+            self.appBlocker.update(apps: self.configuration.active?.apps ?? [], snapshot: self.snapshot, allowance: self.temporaryAccess.grant())
+            self.objectWillChange.send(); self.statusChanged?()
+        }
+        appBlocker.onForeground = { [weak self] id in self?.refreshDailyAccess(foreground: id) }
         appBlocker.onBlocked = { [weak self] app in
             self?.blockedApp = app; self?.showBlockedApp?()
         }
@@ -72,9 +84,26 @@ import UniformTypeIdentifiers
             Task { @MainActor in self?.tick() }
         }
         timer?.tolerance = 1
-        for name in [NSWorkspace.didWakeNotification, NSWorkspace.sessionDidBecomeActiveNotification] {
+        for name in [NSWorkspace.willSleepNotification, NSWorkspace.sessionDidResignActiveNotification, NSWorkspace.screensDidSleepNotification] {
             workspaceObservers.append(NSWorkspace.shared.notificationCenter.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
-                Task { @MainActor in self?.tick(forceSync: true) }
+                MainActor.assumeIsolated {
+                    if name == NSWorkspace.sessionDidResignActiveNotification { self?.sessionLocked = true }
+                    self?.usageSuspended = true; self?.temporaryAccess.suspend()
+                }
+            })
+        }
+        for name in [NSWorkspace.didWakeNotification, NSWorkspace.sessionDidBecomeActiveNotification, NSWorkspace.screensDidWakeNotification] {
+            workspaceObservers.append(NSWorkspace.shared.notificationCenter.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                Task { @MainActor in
+                    if name == NSWorkspace.sessionDidBecomeActiveNotification { self?.sessionLocked = false }
+                    self?.usageSuspended = false; self?.tick(forceSync: true)
+                }
+            })
+        }
+        for locked in [true, false] {
+            let name = NSNotification.Name(locked ? "com.apple.screenIsLocked" : "com.apple.screenIsUnlocked")
+            lockObservers.append(DistributedNotificationCenter.default().addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+                Task { @MainActor in self?.sessionLocked = locked; self?.tick() }
             })
         }
         for name in [NSNotification.Name.NSSystemTimeZoneDidChange, NSNotification.Name.NSSystemClockDidChange] {
@@ -249,8 +278,18 @@ import UniformTypeIdentifiers
         }
         if habitsChanged { Task { await sync() } }
     }
+    var normalAccess: Bool { snapshot.access == "allowed" && snapshot.valid(at: Date()) }
+    func requestTemporaryAccess() {
+        temporaryAccessRequest = UUID(); showSettings?()
+    }
+    func refreshDailyAccess(foreground: String?) {
+        temporaryAccess.refresh(foreground: foreground, configured: Set(configuration.active?.apps.map(\.id) ?? []),
+                                normalAccess: normalAccess, recovery: needsRecovery || !storageIssue.isEmpty, suspended: usageSuspended || sessionLocked)
+        appBlocker.update(apps: configuration.active?.apps ?? [], snapshot: snapshot, allowance: temporaryAccess.grant())
+    }
     func openBlockedApp() {
-        guard snapshot.access == "allowed", snapshot.valid(at: Date()), let app = blockedApp,
+        guard let app = blockedApp,
+              !AppRules.shouldBlock(bundleID: app.bundleID, apps: configuration.active?.apps ?? [], snapshot: snapshot, allowance: temporaryAccess.grant()),
               let url = NSWorkspace.shared.urlForApplication(withBundleIdentifier: app.bundleID) else { return }
         NSWorkspace.shared.openApplication(at: url, configuration: .init()) { _, _ in }
     }
@@ -304,12 +343,15 @@ import UniformTypeIdentifiers
     }
     @discardableResult private func persistSnapshot() -> Bool {
         snapshot.guardedApps = configuration.active?.apps ?? []
-        appBlocker.update(apps: configuration.active?.apps ?? [], snapshot: snapshot)
+        temporaryAccess.verifyStorage()
+        refreshDailyAccess(foreground: NSWorkspace.shared.frontmostApplication?.bundleIdentifier)
+        statusChanged?()
         guard lastPersisted != snapshot else { return true }
         do { try GateFiles.write(snapshot, "snapshot.json", root: root) }
         catch {
             snapshot.access = "blocked"
             storageIssue = "Protection state could not be saved. Access is locked on this Mac; Chrome coverage needs a storage check. Free disk space or restore write access, then retry."
+            refreshDailyAccess(foreground: nil)
             message = storageIssue; statusChanged?(); return false
         }
         lastPersisted = snapshot

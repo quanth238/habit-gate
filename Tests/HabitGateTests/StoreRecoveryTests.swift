@@ -26,4 +26,22 @@ private actor EmptyVault: CredentialStorage {
         #expect(store.configuration == config)
         #expect(String(data: try Data(contentsOf: root.appendingPathComponent("configuration.json")), encoding: .utf8) == "{damaged")
     }
+    @Test func allowanceNeverChangesHabitsWebsitesOrPermanentAppRules() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("habit-gate-allowance-\(UUID())")
+        defer { try? FileManager.default.removeItem(at: root) }
+        let policy = Policy(habitIDs: ["fixture"], domains: ["x.com"], apps: [.init(bundleID: "com.example.chat", name: "Chat")])
+        let config = Configuration(active: policy)
+        try ConfigurationRepository.save(config, root: root)
+        let store = GateStore(root: root, vault: EmptyVault())
+        let proof = store.snapshot
+        store.refreshDailyAccess(foreground: "com.example.chat")
+        #expect(store.temporaryAccess.isCounting)
+        #expect(store.configuration == config); #expect(store.snapshot == proof)
+        #expect(store.snapshot.access == "blocked")
+        #expect(store.temporaryAccess.grant()?.allows("com.example.chat", at: Date()) == true)
+        store.snapshot.access = "allowed"; store.snapshot.lastSyncedAt = Date()
+        store.refreshDailyAccess(foreground: "com.example.chat")
+        #expect(!store.temporaryAccess.isCounting); #expect(store.temporaryAccess.grant() == nil)
+    }
+
 }

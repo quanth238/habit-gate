@@ -202,4 +202,56 @@ import GateCore
         #expect(notices == 1)
     }
 
+    @Test func temporaryGrantCancelsPendingHideAndEndHidesImmediately() async throws {
+        let discord = FakeGuardedApp(target.bundleID, active: true); discord.canHide = false
+        let other = FakeGuardedApp("com.example.Other")
+        let apps = [target, BlockedApp(bundleID: "com.example.Other", name: "Other")]
+        let blocker = AppBlocker(running: { [discord, other] }, frontmost: { discord })
+        var notices = 0; blocker.onBlocked = { _ in notices += 1 }
+        blocker.update(apps: apps, snapshot: .locked())
+        let now = Date()
+        let grant = AppAccessGrant(bundleIDs: [target.id], expiresAt: now.addingTimeInterval(60))
+        blocker.update(apps: apps, snapshot: .locked(), allowance: grant)
+        discord.canHide = true
+        blocker.enforce(discord, showNotice: true)
+        try await Task.sleep(for: .milliseconds(500))
+        #expect(discord.hideCalls == 1); #expect(!discord.isHidden)
+        #expect(other.isHidden); #expect(notices == 0)
+        blocker.update(apps: apps, snapshot: .locked())
+        #expect(discord.isHidden); #expect(discord.hideCalls == 2)
+        try await Task.sleep(for: .milliseconds(250))
+        #expect(notices == 1)
+        blocker.update(apps: apps, snapshot: .locked())
+        #expect(discord.hideCalls == 2); #expect(!discord.isTerminated)
+    }
+    @Test func expiredSessionCannotExemptActivationEvenBeforeScheduledRefresh() async throws {
+        let discord = FakeGuardedApp(target.bundleID, active: true)
+        let blocker = AppBlocker(running: { [discord] }, frontmost: { discord })
+        let now = Date()
+        let grant = AppAccessGrant(bundleIDs: [target.id], expiresAt: now.addingTimeInterval(60))
+        blocker.update(apps: [target], snapshot: .locked(), allowance: grant)
+        #expect(!discord.isHidden)
+        blocker.enforce(discord, now: grant.expiresAt)
+        #expect(discord.isHidden)
+        try await Task.sleep(for: .milliseconds(250))
+        #expect(!discord.isTerminated)
+    }
+
+    @Test func foregroundAccountingRunsBeforeEnforcement() async throws {
+        let discord = FakeGuardedApp(target.bundleID, active: true)
+        let blocker = AppBlocker(running: { [] }, frontmost: { discord })
+        blocker.update(apps: [target], snapshot: .locked())
+        var accounted = false
+        blocker.onForeground = { id in
+            accounted = id == target.bundleID
+            blocker.update(apps: [target], snapshot: .locked(), allowance: .init(bundleIDs: [target.id], expiresAt: Date().addingTimeInterval(60)))
+        }
+        blocker.applicationEvent(discord, showNotice: true)
+        #expect(accounted); #expect(discord.hideCalls == 0)
+        blocker.onForeground = { _ in blocker.update(apps: [target], snapshot: .locked()) }
+        blocker.applicationEvent(discord, showNotice: true)
+        #expect(discord.hideCalls == 1)
+        try await Task.sleep(for: .milliseconds(250))
+    }
+
 }

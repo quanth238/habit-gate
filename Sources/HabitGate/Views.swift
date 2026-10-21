@@ -27,6 +27,9 @@ struct TodayView: View {
                     .font(.system(size: 11)).foregroundStyle(.secondary).padding(.top, 7)
             }
             Divider().overlay(GateTheme.line).padding(.vertical, 16)
+            if !store.normalAccess && !(store.configuration.active?.apps.isEmpty ?? true) {
+                DailyAccessCard(store: store, access: store.temporaryAccess, compact: true)
+            } else {
             HStack {
                 GateOverline(text: "Your essentials")
                 Spacer()
@@ -51,6 +54,7 @@ struct TodayView: View {
                         }
                     }.padding(1)
                 }.frame(height: min(268, CGFloat(store.snapshot.remainingCount) * 70))
+            }
             }
             Divider().overlay(GateTheme.line).padding(.vertical, 15)
             GateSyncStatus(store: store)
@@ -93,10 +97,11 @@ struct TodayView: View {
 }
 
 private enum SettingsPage: String, CaseIterable, Identifiable {
-    case overview, habits, websites, apps, connection, preferences, review
+    case overview, habits, websites, apps, temporary, connection, preferences, review
     var id: String { rawValue }
     var title: String {
         switch self {
+        case .temporary: return "Temporary access"
         case .review: return "Review & activate"
         case .overview: return "Overview"
         case .habits: return "Essential habits"
@@ -108,6 +113,7 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
     }
     var symbol: String {
         switch self {
+        case .temporary: return "timer"
         case .review: return "checkmark.shield"
         case .overview: return "house.fill"
         case .habits: return "checklist"
@@ -119,6 +125,7 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
     }
     var headline: String {
         switch self {
+        case .temporary: return "A little time. Once a day."
         case .review: return "Your rules. No surprises."
         case .overview: return "Today"
         case .habits: return "Start with what matters."
@@ -130,6 +137,7 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
     }
     var subtitle: String {
         switch self {
+        case .temporary: return "One shared daily allowance for your blocked Mac apps. Only foreground use counts."
         case .review: return "Review all choices and verify one Chrome profile before protection begins."
         case .overview: return "Access, Habitify verification and protection coverage."
         case .habits: return "Choose the habits that unlock your selected websites and apps."
@@ -148,6 +156,7 @@ struct SettingsView: View {
     @LocalState private var domains = ""
     @LocalState private var page = SettingsPage.overview
     @LocalState private var localError = ""
+    @LocalState private var accessPageID = UUID()
     @LocalState private var confirmDeleteKey = false
     var body: some View {
         HStack(spacing: 0) {
@@ -172,6 +181,7 @@ struct SettingsView: View {
                                 .fixedSize(horizontal: false, vertical: true)
                         }
                         switch page {
+                        case .temporary: TemporaryAccessView(store: store, access: store.temporaryAccess).id(accessPageID)
                         case .review: activationReview
                         case .overview: overview
                         case .habits: habits
@@ -181,12 +191,19 @@ struct SettingsView: View {
                         case .preferences: preferences
                         }
                         if !localError.isEmpty { GateNotice(text: localError, symbol: "exclamationmark.circle", warning: true) }
-                    }.padding(30).frame(maxWidth: 850, alignment: .leading).frame(maxWidth: .infinity)
+                    }.padding(page == .temporary ? 24 : 30).frame(maxWidth: 850, alignment: .leading).frame(maxWidth: .infinity)
                 }
                 footer
             }.background(GateTheme.canvas)
-        }.tint(GateTheme.blue).frame(minWidth: 880, idealWidth: 980, minHeight: 680, idealHeight: 780)
-             .onAppear { loadDraft(); if store.configuration.active == nil { page = store.hasKey ? .habits : .connection } }
+        }.tint(GateTheme.blue).frame(minWidth: 880, idealWidth: 980, minHeight: 648, idealHeight: 748)
+             .onAppear {
+                 loadDraft()
+                 if store.temporaryAccessRequest != nil { page = .temporary; store.temporaryAccessRequest = nil }
+                 else if store.configuration.active == nil { page = store.hasKey ? .habits : .connection }
+             }
+             .onChange(of: store.temporaryAccessRequest) { request in
+                 if request != nil { page = .temporary; accessPageID = UUID(); store.temporaryAccessRequest = nil }
+             }
             .confirmationDialog("Delete the saved Habitify API key from this Mac?", isPresented: $confirmDeleteKey) {
                 Button("Delete API key and disconnect", role: .destructive) { Task { await store.disconnect(deleteKey: true) } }
                 Button("Cancel", role: .cancel) { }
@@ -198,7 +215,10 @@ struct SettingsView: View {
             VStack(spacing: 5) {
                 ForEach(SettingsPage.allCases.filter { $0 != .review || store.configuration.active == nil }) { item in
                     if item == .connection { Divider().padding(.vertical, 13).padding(.horizontal, 12) }
-                    Button { page = item; localError = "" } label: {
+                    Button {
+                        if item == .temporary { accessPageID = UUID() }
+                        page = item; localError = ""
+                    } label: {
                         HStack(spacing: 11) {
                             Image(systemName: item.symbol).font(.system(size: 15)).frame(width: 22)
                             Text(item.title).font(.system(size: 12, weight: page == item ? .semibold : .regular))

@@ -225,3 +225,15 @@ Current evidence: `validation/ux-reliability-update.json`. Public release remain
 - All **70 Swift tests** pass. New coverage checks deleted IDs, current names and archive flags on successive mocked API reads, plus hidden ineligible new choices and selected unavailable habits that remain blocked even with completed journal fixtures. These fixture transitions do not modify real Habitify data.
 - Release build and installed signature/native-host checks pass. A fresh installed-app sync completed successfully; the picker visibly contains the eight current daily choices and excludes the reported archived/weekly choices. Saved configuration bytes are unchanged, including the prior one-time Zalo exclusion. The complete local catalog still has ten API records, including one archived record, for policy verification.
 - No Habitify writes, additional polling, new performance profile or Chrome change was introduced. Browser tests were not rerun. Evidence: `validation/habit-catalog-update.json`.
+
+## Daily foreground app allowance · 1.5.0 (16), 21 October 2026
+
+The installed feature uses a shared 15-minute daily balance, counts only configured Mac apps in the foreground and pauses on switching away. Settings change the next 4 AM limit without refilling today. Chrome remains 1.1.1 and receives no allowance.
+
+86 Swift tests and 20 Chrome tests passed. The controlled macOS fixture verified visible access followed by one hide at exhaustion, no termination and no duplicate notice. Original permanent configuration, saved used time and login registration were preserved. Signature/native-host checks passed; Habitify synced after manual Keychain approval.
+
+Minimum-window light/dark screenshots and Command-S preference saving were checked using isolated fixtures. Physical sleep/time changes were modeled. A browser URL-policy rejection prevented inspecting the new navigation's blocked-page content; fresh extension diagnostics still reported rules and permissions ready.
+
+Final warm samples: visible window 0.933% CPU / 120.16 MB mean RSS; closed window 0.673% / 108.16 MB over approximately 65 seconds each. The original idle CPU/RSS targets are not met across those samples. Initial closed measurements were lower; different warm-up/authentication states prevent attributing the delta solely to the allowance timer.
+
+See [the feature specification, flow, screenshots and detailed evidence](docs/DAILY-ACCESS.md), [machine-readable validation](validation/daily-access-1.5.0.json) and [rollback script](scripts/rollback-daily-access.sh).

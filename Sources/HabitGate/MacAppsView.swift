@@ -110,7 +110,7 @@ struct MacAppsSettingsView: View {
     }
 }
 
-private struct MacAppIcon: View {
+struct MacAppIcon: View {
     var app: BlockedApp
     @AppViewState private var icon: NSImage?
     var body: some View {
@@ -190,6 +190,12 @@ struct BlockedMacAppView: View {
                 }
                 Button { store.tick(forceSync: true) } label: { Label("Sync now", systemImage: "arrow.clockwise") }
                     .buttonStyle(GateButtonStyle()).disabled(store.isSyncing || !store.hasKey)
+            }
+            if !allowed {
+                Button { store.requestTemporaryAccess() } label: {
+                    Label("View daily app allowance", systemImage: "timer")
+                        .frame(maxWidth: .infinity)
+                }.buttonStyle(GateButtonStyle())
             }
             HStack {
                 Text("Your app session stays intact.").font(.system(size: 10)).foregroundStyle(.secondary)

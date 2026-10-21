@@ -25,8 +25,9 @@ public enum AppRules {
         return apps.sorted { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
     }
     public static func shouldBlock(bundleID: String?, apps: [BlockedApp], snapshot: GateSnapshot,
-                                   now: Date = Date(), calendar: Calendar = .current) -> Bool {
+                                   now: Date = Date(), calendar: Calendar = .current, allowance: AppAccessGrant? = nil) -> Bool {
         guard let bundleID, selectable(bundleID), apps.contains(where: { $0.id == bundleID.lowercased() }) else { return false }
+        if allowance?.allows(bundleID, at: now) == true { return false }
         return snapshot.access != "allowed" || !snapshot.valid(at: now, calendar: calendar)
     }
 }

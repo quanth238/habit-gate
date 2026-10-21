@@ -21,7 +21,9 @@ extension NSRunningApplication: GuardedApplication {}
     private let frontmost: () -> (any GuardedApplication)?
     private var apps: [BlockedApp] = []
     private var snapshot = GateSnapshot.locked()
-    private var wasBlocking = false
+    private var blockedIDs = Set<String>()
+    private var allowance: AppAccessGrant?
+    var onForeground: ((String?) -> Void)?
     private var observers: [NSObjectProtocol] = []
     private var issues: [String: String] = [:]
     private final class HideRequest {
@@ -44,12 +46,18 @@ extension NSRunningApplication: GuardedApplication {}
                 // successful hide may change isActive before this task runs.
                 let showNotice = note.name != NSWorkspace.didLaunchApplicationNotification || app.isActive
                 Task { @MainActor in
-                    self?.enforce(app, showNotice: showNotice)
+                    self?.applicationEvent(app, showNotice: showNotice)
                 }
             })
         }
     }
-    func update(apps: [BlockedApp], snapshot: GateSnapshot, now: Date = Date(), calendar: Calendar = .current) {
+    func applicationEvent(_ app: any GuardedApplication, showNotice: Bool) {
+        // Account for the foreground transition before checking the exception.
+        onForeground?(frontmost()?.bundleIdentifier)
+        enforce(app, showNotice: showNotice)
+    }
+    func update(apps: [BlockedApp], snapshot: GateSnapshot, now: Date = Date(), calendar: Calendar = .current, allowance: AppAccessGrant? = nil) {
+        self.allowance = allowance
         let changed = self.apps != apps
         self.apps = apps; self.snapshot = snapshot
         if changed {
@@ -58,17 +66,22 @@ extension NSRunningApplication: GuardedApplication {}
             checking = checking.filter { selected.contains($0.key) }
             issues = issues.filter { selected.contains($0.key) }; reportIssues()
         }
-        let blocking = !apps.isEmpty && (snapshot.access != "allowed" || !snapshot.valid(at: now, calendar: calendar))
-        if blocking && (changed || !wasBlocking) {
+        let next = Set(apps.filter {
+            AppRules.shouldBlock(bundleID: $0.bundleID, apps: apps, snapshot: snapshot, now: now, calendar: calendar, allowance: allowance)
+        }.map(\.id))
+        checking = checking.filter { next.contains($0.key) }
+        issues = issues.filter { next.contains($0.key) }; reportIssues()
+        if changed || !next.subtracting(blockedIDs).isEmpty {
             for app in running() { enforce(app, now: now, calendar: calendar) }
-        } else if blocking, let app = frontmost() {
+        } else if !next.isEmpty, let app = frontmost() {
             enforce(app, now: now, calendar: calendar)
-        } else if !blocking { checking.removeAll(); issues.removeAll(); reportIssues() }
-        wasBlocking = blocking
+        }
+        blockedIDs = next
     }
+
     func enforce(_ app: any GuardedApplication, showNotice: Bool = false, now: Date = Date(), calendar: Calendar = .current) {
         guard !app.isTerminated,
-              AppRules.shouldBlock(bundleID: app.bundleIdentifier, apps: apps, snapshot: snapshot, now: now, calendar: calendar),
+              AppRules.shouldBlock(bundleID: app.bundleIdentifier, apps: apps, snapshot: snapshot, now: now, calendar: calendar, allowance: allowance),
               let target = apps.first(where: { $0.id == app.bundleIdentifier?.lowercased() }) else { return }
         let notify = showNotice || app.isActive
         let request: HideRequest
@@ -99,7 +112,7 @@ extension NSRunningApplication: GuardedApplication {}
         // consume or retry a newer hide operation for the same selected app.
         guard checking[target.id] === request else { return }
         guard !app.isTerminated,
-              AppRules.shouldBlock(bundleID: app.bundleIdentifier, apps: apps, snapshot: snapshot) else {
+              AppRules.shouldBlock(bundleID: app.bundleIdentifier, apps: apps, snapshot: snapshot, allowance: allowance) else {
             checking.removeValue(forKey: target.id); return
         }
         if app.isHidden {

@@ -1,0 +1,16 @@
+{
+  "checks" : {
+    "foreground_timer_started" : true,
+    "grant_revoked" : true,
+    "hide_called_once" : true,
+    "no_duplicate_notice" : true,
+    "process_preserved" : true,
+    "shared_minute_exhausted" : true,
+    "window_hidden" : true,
+    "window_was_visible_during_grant" : true
+  },
+  "error" : "",
+  "notices" : 0,
+  "passed" : true,
+  "simulated_foreground" : true
+}

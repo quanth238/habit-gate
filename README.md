@@ -1,10 +1,18 @@
 # Habit Gate for Mac
 
-A native SwiftUI menu-bar app plus a Chrome Manifest V3 extension. Your selected websites and Mac apps remain gated until all selected daily Habitify habits due on the active habit date are complete. There is no pause or exercise bypass.
+A native SwiftUI menu-bar app plus a Chrome Manifest V3 extension. Your selected websites and Mac apps remain gated until all selected daily Habitify habits due on the active habit date are complete. A shared daily foreground-use allowance provides brief access to blocked Mac apps; websites keep their normal habit rules.
 
-**Current alpha: macOS 1.4.5 (15), Chrome extension 1.1.1.** The [current implementation review](docs/UI-UX-REVIEW.md) maps the supplied improvement requirements to changes, screenshots, evidence and remaining release gates. `VALIDATION.md` is a chronological record; its older version sections describe historical builds.
+**Current alpha: macOS 1.5.0 (16), Chrome extension 1.1.1.** The [daily allowance specification](docs/DAILY-ACCESS.md) describes this version. The [earlier implementation review](docs/UI-UX-REVIEW.md) records previous UI and reliability work. `VALIDATION.md` is a chronological record; its older version sections describe historical builds.
 
 ![Midnight Blue blocked-page preview](design/midnight-blue/laptop-1280x640.png)
+
+## Daily app allowance · 1.5.0
+
+Open **Temporary access** in the sidebar to configure a daily allowance. The default is **15 minutes total per habit day**, shared by all configured blocked Mac apps. Opening one of those apps uses the balance automatically. Switching to another app pauses the timer; switching between protected apps continues using the same balance. There is no Start button, extension button or unlimited session restart.
+
+Only foreground use while habits are incomplete counts. Sleep and screen lock pause tracking. When the balance reaches zero, the normal guard hides protected app windows without terminating their processes; calls and uploads may continue in the background. Complete your habits for ordinary access. Chrome does not receive the allowance and stays blocked according to Habitify.
+
+The balance resets at **4 AM**. Choose 5, 15, 30, 60 or custom 1–120 whole minutes in Settings. Changes apply at the next 4 AM reset and never refill the current day's balance. Time already used is retained across app switches and restarts. See [feature specification, flow and validation](docs/DAILY-ACCESS.md).
 
 ## Repository and review documents
 

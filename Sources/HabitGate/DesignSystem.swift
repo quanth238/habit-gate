@@ -225,6 +225,7 @@ struct GateNotice: View {
     }
     static func status(_ store: GateStore) -> String {
         if store.configuration.active == nil { return "Setup needed" }
+        if store.temporaryAccess.grant() != nil { return "App time available · sites locked" }
         return store.snapshot.access == "allowed" ? "Distractions unlocked" : "Distractions locked"
     }
     static func summary(_ store: GateStore) -> String {

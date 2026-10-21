@@ -50,6 +50,10 @@ import Darwin
         status.button?.image = NSImage(systemSymbolName: allowed ? "lock.open" : "lock.shield", accessibilityDescription: allowed ? "Distractions unlocked" : "Distractions blocked")
         status.button?.title = store.configuration.active == nil ? " Set up" : allowed ? " Ready" :
             store.snapshot.habits.isEmpty ? " Checking" : " \(store.snapshot.remainingCount) left"
+        if store.temporaryAccess.isCounting {
+            status.button?.image = NSImage(systemSymbolName: "timer", accessibilityDescription: "Temporary app access")
+            status.button?.title = " \(max(1, Int(ceil(store.temporaryAccess.remaining / 60)))) min left"
+        }
         status.button?.toolTip = "Habit Gate · \(store.snapshot.reason)"
     }
     @objc private func togglePopover() {
@@ -64,6 +68,7 @@ import Darwin
     }
     private func openSettings() {
         popover.performClose(nil)
+        blockedAppWindow?.orderOut(nil)
         if settingsWindow == nil {
             let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 980, height: 780), styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView], backing: .buffered, defer: false)
             window.title = "Habit Gate"; window.isReleasedWhenClosed = false; window.delegate = self
@@ -106,5 +111,6 @@ import Darwin
         if window === settingsWindow { settingsWindow = nil }
         if window === blockedAppWindow { blockedAppWindow = nil }
     }
+    func applicationWillTerminate(_ notification: Notification) { store?.temporaryAccess.suspend() }
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool { openSettings(); return true }
 }

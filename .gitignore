@@ -22,3 +22,7 @@ configuration.unreadable-*.json
 snapshot.json
 catalog.json
 clients/
+
+# Per-user temporary grants are private runtime state.
+temporary-access.json
+daily-access.json
