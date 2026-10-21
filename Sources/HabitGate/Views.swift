@@ -171,36 +171,35 @@ struct SettingsView: View {
                                     Button("Restore saved rules") { store.restoreSavedRules(); loadDraft() }.buttonStyle(GateButtonStyle(primary: true))
                                     Button("Choose rules backup…") { store.chooseRecoveryBackup(); loadDraft() }.buttonStyle(GateButtonStyle())
                                     Button("Show support folder") { NSWorkspace.shared.open(store.root) }.buttonStyle(GateButtonStyle())
-              
+                                }
+                            }
+                            HStack(alignment: .top) {
+                                VStack(alignment: .leading, spacing: 9) {
+                                    if page != .temporary { GateOverline(text: page == .overview ? "Your focus, protected" : page.title) }
+                                    Text(page.headline).font(.system(size: page == .temporary ? 25 : 27, weight: page == .temporary ? .semibold : .bold)).tracking(-0.7)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                    Text(page.subtitle).font(.system(size: 12)).foregroundStyle(.secondary)
+                                        .fixedSize(horizontal: false, vertical: true)
+                                }
+                                if page == .temporary {
+                                    Spacer(minLength: 12)
+                                    GatePill(text: "\(store.temporaryAccess.budget.todayMinutes) min daily", symbol: "clock")
+                                }
+                            }
+                            switch page {
+                            case .temporary: TemporaryAccessView(store: store, access: store.temporaryAccess).frame(maxHeight: .infinity)
+                            case .review: activationReview
+                            case .overview: overview
+                            case .habits: habits
+                            case .websites: websites
+                            case .apps: MacAppsSettingsView(store: store, onContinue: { page = .review })
+                            case .connection: connection
+                            case .preferences: preferences
+                            }
+                            if !localError.isEmpty { GateNotice(text: localError, symbol: "exclamationmark.circle", warning: true) }
+                        }.padding(page == .temporary ? 24 : 30).frame(maxWidth: 850, alignment: .leading).frame(maxWidth: .infinity)
+                            .frame(minHeight: page == .temporary ? viewport.size.height : 0, alignment: .top)
                     }
-                        }
-                        HStack(alignment: .top) {
-                            VStack(alignment: .leading, spacing: 9) {
-                                if page != .temporary { GateOverline(text: page == .overview ? "Your focus, protected" : page.title) }
-                                Text(page.headline).font(.system(size: page == .temporary ? 25 : 27, weight: page == .temporary ? .semibold : .bold)).tracking(-0.7)
-                                    .fixedSize(horizontal: false, vertical: true)
-                                Text(page.subtitle).font(.system(size: 12)).foregroundStyle(.secondary)
-                                    .fixedSize(horizontal: false, vertical: true)
-                            }
-                            if page == .temporary {
-                                Spacer(minLength: 12)
-                                GatePill(text: "\(store.temporaryAccess.budget.todayMinutes) min daily", symbol: "clock")
-                            }
-                        }
-                        switch page {
-                        case .temporary: TemporaryAccessView(store: store, access: store.temporaryAccess).frame(maxHeight: .infinity)
-                        case .review: activationReview
-                        case .overview: overview
-                        case .habits: habits
-                        case .websites: websites
-                        case .apps: MacAppsSettingsView(store: store, onContinue: { page = .review })
-                        case .connection: connection
-                        case .preferences: preferences
-                        }
-                        if !localError.isEmpty { GateNotice(text: localError, symbol: "exclamationmark.circle", warning: true) }
-                    }.padding(page == .temporary ? 24 : 30).frame(maxWidth: 850, alignment: .leading).frame(maxWidth: .infinity)
-                        .frame(minHeight: page == .temporary ? viewport.size.height : 0, alignment: .top)
-                  }
                 }
                 footer
             }.background(GateTheme.canvas)
