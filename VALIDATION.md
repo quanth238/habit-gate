@@ -245,3 +245,12 @@ The main app now opens a large countdown with Start access / End access. Editing
 87 Swift tests and 20 Chrome tests passed. The native fixture with explicit Start verified visible access, exactly one hide at exhaustion, a preserved process and no duplicate notice. Installed UI verification confirmed Start → End → Start without refilling the balance, the settings shortcut, unchanged permanent rules and successful Habitify sync. Chrome remains 1.1.1. See [evidence](validation/manual-access-1.5.1.json) and [current screenshots/specification](docs/DAILY-ACCESS.md).
 
 No new performance claim is made; the earlier warm 1.5.0 samples and their target misses remain recorded above.
+
+
+## Continuous daily countdown · 1.5.2 (18)
+
+Start now begins the clock immediately and spends one shared daily allowance continuously, including app switching, idle time, sleep and screen lock. End saves unused time and restores normal app enforcement. Zero prevents another temporary grant. A blue circular clock is visible by default, and daily-limit editing stays in Settings. This supersedes the foreground-only behavior in 1.5.0–1.5.1.
+
+91 Swift tests pass. A live isolated five-second expiry test hid a disposable window exactly once, preserved its process and revoked the grant without relying on foreground events. Installed Start/End verification confirmed that the clock decreases while Habit Gate itself remains foreground. Installed signature/native protocol checks pass; permanent settings, daily usage, the four selected apps and GeForce NOW's exclusion were preserved. Chrome 1.1.1 is unchanged; browser tests were not rerun. Minimum-window light/dark previews show the clock and essential controls together. Physical sleep/clock changes, a full accessibility audit and a new resource benchmark were not performed.
+
+See [the specification and flow](docs/DAILY-ACCESS.md) and [recorded evidence](validation/continuous-access-1.5.2.json). The newly signed app initially awaited local Keychain approval to resume Habitify sync; the timer and ordinary cached protection operate independently of that approval.

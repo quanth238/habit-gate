@@ -125,7 +125,7 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
     }
     var headline: String {
         switch self {
-        case .temporary: return "A little time. Once a day."
+        case .temporary: return "Temporary access"
         case .review: return "Your rules. No surprises."
         case .overview: return "Today"
         case .habits: return "Start with what matters."
@@ -137,7 +137,7 @@ private enum SettingsPage: String, CaseIterable, Identifiable {
     }
     var subtitle: String {
         switch self {
-        case .temporary: return "One shared daily allowance for your blocked Mac apps. Only foreground use counts."
+        case .temporary: return "A little time for what you need. One shared daily balance."
         case .review: return "Review all choices and verify one Chrome profile before protection begins."
         case .overview: return "Access, Habitify verification and protection coverage."
         case .habits: return "Choose the habits that unlock your selected websites and apps."
@@ -173,7 +173,7 @@ struct SettingsView: View {
                             }
                         }
                         VStack(alignment: .leading, spacing: 9) {
-                            GateOverline(text: page == .overview ? "Your focus, protected" : page.title)
+                            if page != .temporary { GateOverline(text: page == .overview ? "Your focus, protected" : page.title) }
                             Text(page.headline).font(.system(size: 27, weight: .bold)).tracking(-0.7)
                                 .fixedSize(horizontal: false, vertical: true)
                             Text(page.subtitle).font(.system(size: 12)).foregroundStyle(.secondary)

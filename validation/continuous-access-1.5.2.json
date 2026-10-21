@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-21",
+  "nativeVersion": "1.5.2",
+  "nativeBuild": 18,
+  "chromeVersion": "1.1.1",
+  "behavior": {
+    "startRequired": true,
+    "countdownStartsImmediately": true,
+    "countsContinuouslyUntilEnd": true,
+    "foregroundOnly": false,
+    "sleepAndLockConsumeTime": true,
+    "endRestoresProtectionAndSavesUnusedTime": true,
+    "sharedDailyMinutes": 15,
+    "repeatedStartDoesNotRefill": true,
+    "zeroDisablesStart": true,
+    "resetAtLocalFourAM": true,
+    "restartRequiresStart": true,
+    "websiteBypass": false,
+    "extraTimeButton": false,
+    "allowanceEditor": "Settings",
+    "mainPage": "Circular countdown by default"
+  },
+  "checks": {
+    "swiftTestsPassed": 91,
+    "chromeTests": "Not rerun: no browser source, manifest or message changes. Existing 1.1.1 retained.",
+    "releaseBuildPassed": true,
+    "installedSignatureAndNativeHostPassed": true,
+    "installedMatchesSignedDist": true,
+    "permanentConfigurationPreserved": true,
+    "geforceRemainsExcluded": true,
+    "initialUsagePreserved": true,
+    "manualStartAndEndSpendsOnlyElapsedTime": true,
+    "installedSessionEnded": true,
+    "ledgerMode": "0o600",
+    "keychainAfterInstall": "Waiting for local macOS approval; no credential was read by the agent."
+  },
+  "uiVerification": [
+    "Installed main page opens the circular clock by default.",
+    "Start changed to End immediately; clock decreased while Habit Gate stayed foreground.",
+    "End restored Start and preserved unused daily time.",
+    "880 x 680 light and dark fixtures fit the clock and essential actions without needing to scroll.",
+    "Four permanently configured apps remained selected; GeForce NOW remained excluded."
+  ],
+  "nativeExpiryFixture": {
+    "checks": {
+      "countdown_started": true,
+      "grant_revoked": true,
+      "hide_called_once": true,
+      "no_duplicate_notice": true,
+      "process_preserved": true,
+      "shared_minute_exhausted": true,
+      "window_hidden": true,
+      "window_was_visible_during_grant": true
+    },
+    "error": "",
+    "foreground_events_required": false,
+    "notices": 0,
+    "passed": true
+  },
+  "limits": [
+    "Sleep, timezone, reset and rollback were modeled in automated tests; the Mac clock and sleep state were not changed.",
+    "No complete keyboard/VoiceOver audit was performed.",
+    "No performance improvement is claimed; prior 1.5.0 measurements exceeded the original targets."
+  ],
+  "screenshots": [
+    "design/temporary-access/continuous/installed-ready.png",
+    "design/temporary-access/continuous/installed-active.png",
+    "design/temporary-access/continuous/preview-dark-880x680.png",
+    "design/temporary-access/continuous/preview-light-880x680.png"
+  ]
+}

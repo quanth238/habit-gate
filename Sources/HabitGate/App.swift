@@ -112,6 +112,6 @@ import Darwin
         if window === settingsWindow { settingsWindow = nil; store.pendingAccessApp = nil }
         if window === blockedAppWindow { blockedAppWindow = nil }
     }
-    func applicationWillTerminate(_ notification: Notification) { store?.temporaryAccess.suspend() }
+    func applicationWillTerminate(_ notification: Notification) { store?.temporaryAccess.endAccess() }
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool { openSettings(); return true }
 }

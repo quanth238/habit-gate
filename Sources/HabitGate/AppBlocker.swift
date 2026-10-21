@@ -52,7 +52,7 @@ extension NSRunningApplication: GuardedApplication {}
         }
     }
     func applicationEvent(_ app: any GuardedApplication, showNotice: Bool) {
-        // Account for the foreground transition before checking the exception.
+        // Refresh the access grant before checking the exception.
         onForeground?(frontmost()?.bundleIdentifier)
         enforce(app, showNotice: showNotice)
     }

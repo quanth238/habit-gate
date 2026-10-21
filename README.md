@@ -158,3 +158,10 @@ The installed screen, disabled button, release build and installed signature/nat
 Habitify's catalog includes archived habits. The essential-habit picker now offers active habits with supported daily goals, rather than displaying every API record. Already-selected unavailable habits remain visible with a specific explanation so selections can be repaired; missing selected IDs still appear as configuration problems. The complete API catalog remains available to the policy engine, and filtering never counts a missing or archived habit as complete.
 
 A fresh live sync and the installed eight-row daily picker were verified. All **70 Swift tests** pass, including refreshed API results with deletion/rename/archive changes and unavailable selections that must remain blocked. Existing rules are unchanged. The Chrome extension was unchanged and its tests were not rerun. See `validation/habit-catalog-update.json`.
+
+
+## Continuous daily countdown · 1.5.2
+
+Temporary access opens a blue circular clock by default. Start immediately spends the shared daily allowance (15 minutes by default), continuously across app switching, idle time, sleep and screen lock. End restores app blocking and saves unused time; a later Start resumes the same daily balance. Zero ends access and disables Start until the reset or normal habit completion. No extra-time control exists. Daily-limit editing remains in Settings and applies at the next 4 AM boundary. Websites retain ordinary protection.
+
+See [the current flow, specification and screenshots](docs/DAILY-ACCESS.md) and [validation evidence](validation/continuous-access-1.5.2.json). This supersedes foreground-only counting in versions 1.5.0–1.5.1.

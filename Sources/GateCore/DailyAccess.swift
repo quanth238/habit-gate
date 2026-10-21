@@ -11,7 +11,7 @@ public struct AppAccessGrant: Equatable {
     }
 }
 
-/// One shared daily foreground-use balance, independent of habit completion.
+/// One shared daily countdown balance, independent of habit completion.
 public struct DailyAccessBudget: Codable, Equatable {
     public var version = 1
     public var limitMinutes: Int
@@ -20,6 +20,8 @@ public struct DailyAccessBudget: Codable, Equatable {
     public var resetsAt: Date
     public var usedSeconds: Double
     public var activeSince: Date?
+    // Legacy foreground records remain readable. New countdowns use activeSince
+    // without a bundle ID because time belongs to the session, not an app.
     public var activeBundleID: String?
     public var savedAt: Date
     public init(now: Date, minutes: Int = 15, calendar: Calendar = .current) {
@@ -38,7 +40,7 @@ public struct DailyAccessBudget: Codable, Equatable {
         version == 1 && (1...120).contains(limitMinutes) && (1...120).contains(todayMinutes) &&
         usedSeconds.isFinite && usedSeconds >= 0 && usedSeconds <= totalSeconds &&
         habitDate.count == 10 && resetsAt > savedAt && resetsAt.timeIntervalSince(savedAt) <= 27 * 3600 &&
-        (activeSince == nil) == (activeBundleID == nil) &&
+        (activeBundleID == nil || activeSince != nil) &&
         (activeBundleID.map { AppRules.selectable($0) && $0 == $0.lowercased() } ?? true) &&
         (activeSince.map { $0 <= savedAt && savedAt.timeIntervalSince($0) <= 27 * 3600 } ?? true)
     }

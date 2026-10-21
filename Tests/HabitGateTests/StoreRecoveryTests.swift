@@ -36,13 +36,13 @@ private actor EmptyVault: CredentialStorage {
         store.tick()
         let proof = store.snapshot
         #expect(store.startDailyAccess())
-        store.refreshDailyAccess(foreground: "com.example.chat")
+        store.refreshDailyAccess()
         #expect(store.temporaryAccess.isCounting)
         #expect(store.configuration == config); #expect(store.snapshot == proof)
         #expect(store.snapshot.access == "blocked")
         #expect(store.temporaryAccess.grant()?.allows("com.example.chat", at: Date()) == true)
         store.snapshot.access = "allowed"; store.snapshot.lastSyncedAt = Date()
-        store.refreshDailyAccess(foreground: "com.example.chat")
+        store.refreshDailyAccess()
         #expect(!store.temporaryAccess.isCounting); #expect(store.temporaryAccess.grant() == nil)
     }
 

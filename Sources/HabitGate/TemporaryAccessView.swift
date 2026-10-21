@@ -7,20 +7,8 @@ struct TemporaryAccessView: View {
     @ObservedObject var store: GateStore
     @ObservedObject var access: DailyAccessController
     var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            DailyAccessCard(store: store, access: access)
-            HStack(spacing: 9) {
-                ForEach(store.configuration.active?.apps ?? []) { app in
-                    MacAppIcon(app: app).help(app.name).accessibilityHidden(false).accessibilityLabel(app.name)
-                }
-                Spacer(minLength: 0)
-                Label("Websites stay protected", systemImage: "lock.shield")
-                    .font(.system(size: 10)).foregroundStyle(.secondary)
-            }
-            Button { store.requestTemporaryAccess(settings: true) } label: {
-                Label("Daily allowance settings", systemImage: "gearshape")
-            }.buttonStyle(.plain).font(.system(size: 11, weight: .medium)).foregroundStyle(GateTheme.blue)
-        }.onDisappear { store.pendingAccessApp = nil }
+        DailyAccessCard(store: store, access: access)
+            .onDisappear { store.pendingAccessApp = nil }
     }
 }
 
@@ -85,11 +73,11 @@ struct DailyAccessCard: View {
         if !access.issue.isEmpty || store.needsRecovery { return "Allowance locked · needs attention" }
         if access.remaining <= 0 { return "Daily allowance used up" }
         if !access.accessStarted { return "Ready when you need it" }
-        return access.isCounting ? "Counting foreground use" : "Access on · paused until you use an app"
+        return "Temporary access is on"
     }
     var body: some View {
-        GateCard(padding: compact ? 14 : 20) {
-            VStack(alignment: .leading, spacing: compact ? 8 : 16) {
+        GateCard(padding: compact ? 14 : 16) {
+            VStack(alignment: .leading, spacing: compact ? 8 : 10) {
                 HStack {
                     Label("Today’s app allowance", systemImage: "timer")
                         .font(.system(size: 12, weight: .semibold)).foregroundStyle(GateTheme.blue)
@@ -100,6 +88,13 @@ struct DailyAccessCard: View {
                             .buttonStyle(.plain).accessibilityLabel("Configure daily allowance")
                     }
                 }
+                if !compact {
+                    HStack(spacing: 10) {
+                        ForEach(store.configuration.active?.apps ?? []) { app in
+                            MacAppIcon(app: app).help(app.name).accessibilityHidden(false).accessibilityLabel(app.name)
+                        }
+                    }.frame(maxWidth: .infinity)
+                }
                 if access.isCounting {
                     TimelineView(.periodic(from: .now, by: 1)) { _ in countdown }
                 } else { countdown }
@@ -107,7 +102,7 @@ struct DailyAccessCard: View {
                     Text("One minute or less left today").font(.system(size: 10, weight: .medium)).foregroundStyle(.orange)
                 }
                 if !compact {
-                    Text(access.accessStarted ? "Switching away pauses your time. End access when you’re done." : "Start when you need access. Only foreground app use counts.")
+                    Text(access.accessStarted ? "End access to block apps again and save unused time." : "Start when needed. Time counts continuously until you end access.")
                         .font(.system(size: 11)).foregroundStyle(.secondary).frame(maxWidth: .infinity)
                 }
                 if access.accessStarted {
@@ -119,6 +114,16 @@ struct DailyAccessCard: View {
                         Text("Start access").frame(maxWidth: .infinity)
                     }.buttonStyle(GateButtonStyle(primary: true))
                         .disabled(!access.canStart || store.normalAccess || store.needsRecovery)
+                }
+                if !compact {
+                    HStack {
+                        Label("Websites stay protected", systemImage: "lock.shield")
+                            .font(.system(size: 10)).foregroundStyle(.secondary)
+                        Spacer(minLength: 8)
+                        Button { store.requestTemporaryAccess(settings: true) } label: {
+                            Label("Allowance settings", systemImage: "gearshape")
+                        }.buttonStyle(.plain).font(.system(size: 10, weight: .medium)).foregroundStyle(GateTheme.blue)
+                    }
                 }
                 if !access.issue.isEmpty {
                     Text(access.issue).font(.system(size: 10)).foregroundStyle(.orange).fixedSize(horizontal: false, vertical: true)
@@ -140,11 +145,24 @@ struct DailyAccessCard: View {
                 Spacer(minLength: 0)
             }
         } else {
-            VStack(spacing: 12) {
-                Text(digits).font(.system(size: 76, weight: .semibold, design: .rounded)).monospacedDigit()
-                    .tracking(-2).accessibilityLabel("\(seconds / 60) minutes \(seconds % 60) seconds left today")
+            VStack(spacing: 10) {
+                ZStack {
+                    Circle().stroke(GateTheme.blue.opacity(0.12), lineWidth: 10)
+                    Circle().trim(from: 0, to: min(1, max(0, access.remaining / access.budget.totalSeconds)))
+                        .stroke(GateTheme.blue, style: StrokeStyle(lineWidth: 10, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                    VStack(spacing: 7) {
+                        Text(digits).font(.system(size: 49, weight: .semibold, design: .rounded)).monospacedDigit()
+                            .tracking(-1).accessibilityLabel("\(seconds / 60) minutes \(seconds % 60) seconds left today")
+                        Text("remaining today").font(.system(size: 11)).foregroundStyle(.secondary)
+                        if access.isCounting {
+                            Text("Ends at \(min(access.budget.resetsAt, Date().addingTimeInterval(access.remaining)).formatted(date: .omitted, time: .shortened))")
+                                .font(.system(size: 11)).foregroundStyle(.secondary)
+                        }
+                    }
+                }.frame(width: 196, height: 196).padding(5)
                 countdownStatus
-            }.frame(maxWidth: .infinity).padding(.vertical, 8)
+            }.frame(maxWidth: .infinity)
         }
     }
     private var countdownStatus: some View {

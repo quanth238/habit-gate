@@ -44,6 +44,18 @@ struct DailyAccessTests {
         value.usedSeconds = -1; #expect(!value.wellFormed)
         value.usedSeconds = 901; #expect(!value.wellFormed)
         value.usedSeconds = 0; value.limitMinutes = 121; #expect(!value.wellFormed)
-        value.limitMinutes = 15; value.activeSince = now; #expect(!value.wellFormed)
+        value.limitMinutes = 15; value.activeSince = now.addingTimeInterval(1); #expect(!value.wellFormed)
+        value.activeSince = nil; value.activeBundleID = "com.example.chat"; #expect(!value.wellFormed)
+    }
+    @Test func countdownAndLegacyForegroundRecordsRemainReadable() throws {
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: root) }
+        var value = DailyAccessBudget(now: now)
+        value.activeSince = now
+        try DailyAccessFile.save(value, root: root)
+        #expect(DailyAccessFile.load(root: root) == value)
+        value.activeBundleID = "com.example.chat"
+        try DailyAccessFile.save(value, root: root)
+        #expect(DailyAccessFile.load(root: root) == value)
     }
 }
