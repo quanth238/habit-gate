@@ -2,7 +2,7 @@
 
 A native SwiftUI menu-bar app plus a Chrome Manifest V3 extension. Your selected websites and Mac apps remain gated until all selected daily Habitify habits due on the active habit date are complete. A shared daily foreground-use allowance provides brief access to blocked Mac apps; websites keep their normal habit rules.
 
-**Current alpha: macOS 1.5.5 (21), Chrome extension 1.1.1.** The [daily allowance specification](docs/DAILY-ACCESS.md) describes this version. The [earlier implementation review](docs/UI-UX-REVIEW.md) records previous UI and reliability work. `VALIDATION.md` is a chronological record; its older version sections describe historical builds.
+**Current alpha: macOS 1.6.0 (22), Chrome extension 1.1.1.** The [daily allowance specification](docs/DAILY-ACCESS.md) describes this version. The [earlier implementation review](docs/UI-UX-REVIEW.md) records previous UI and reliability work. `VALIDATION.md` is a chronological record; its older version sections describe historical builds.
 
 ![Midnight Blue blocked-page preview](design/midnight-blue/laptop-1280x640.png)
 
@@ -44,6 +44,7 @@ Safari is not installed or protected in this release. There is no Apple signing 
 - A habit day runs from **4 AM to 4 AM in the Mac's local timezone**. Between midnight and 4 AM, the previous calendar date is used in the Habitify journal query. Enter late-night check-ins on that previous date in Habitify. The app always shows the queried date; Habitify itself resets at midnight.
 - Only Habitify's `completed` status counts. Partial progress, `skipped`, `failed`, missing journal entries, and unknown statuses remain blocked. A successfully fetched undo re-locks access.
 - Repeat schedules support daily, selected weekdays (Sunday = 0), selected month dates, and intervals from the habit start date. A verified rest day unlocks automatically. Selected habits that go missing, are archived, end, or become unsupported cause a configuration warning and remain blocked.
+- **Optional weekends off:** Saturday 4 AM through Monday 4 AM has no habit restrictions on configured sites or apps, including offline. Weekday habit rules and the daily allowance resume normally. Change this under Settings → Your daily routine.
 - The first activation is immediate. After activation, **habit changes wait until the next 4 AM**. **Website/app additions apply when saved**, using today’s existing habit proof. **Website/app removals wait until the next 4 AM**, including a target added earlier that same day. A mixed save adds new targets now while retaining removed targets until the boundary. A timezone change rebases the remaining pending changes. Existing pending target additions are promoted automatically on update.
 - If Habitify or the native bridge becomes unavailable, already verified completion remains usable only until its original 4 AM expiry. Unverified states remain blocked. Rate limiting and connectivity errors use 1, 2, 5, then 15-minute retry delays, respecting a longer server Retry-After.
 - A browser extension is voluntary enforcement: another unconfigured browser/profile, disabling permissions, or removing the extension can bypass it. The app reports connected profiles, not whole-Mac website coverage.
@@ -186,3 +187,10 @@ All 91 Swift tests pass. Daily accounting, enforcement, Chrome 1.1.1 and permane
 Settings → Interface size offers Compact (90%), Standard (100%, default), and Large (110%). The selected scale is saved immediately and stays fixed across displays and app restarts. Window resizing and full screen still work; the minimum window grows when a larger preset needs room. Main content reflows and scrolls within that window.
 
 Appearance uses a separate local preference. Protection rules, the daily balance, the menu-bar popup, blocked-app dialog and Chrome 1.1.1 are unchanged. All 91 Swift tests pass. See the [display checks and screenshots](design/interface-size/README.md) and [validation](validation/interface-size-1.5.5.json).
+
+
+## Weekends off · 1.6.0
+
+Settings → Your daily routine → **Take weekends off** allows configured websites and Mac apps from Saturday at 4 AM through Monday at 4 AM, using the same local habit-day boundary as the rest of the app. It works without a Habitify response and does not spend the daily app allowance. The main access page shows “Enjoy your weekend” and “No timer needed.” Weekday rules resume automatically.
+
+This optional setting applies immediately and defaults off for existing installations. It was enabled on the author's Mac at the user's request. The schedule runs locally; Habitify habits are not edited or marked completed. Chrome 1.1.1 and its permissions are unchanged. All 99 Swift tests and 20 browser tests pass. See the [behavior and architecture](docs/WEEKENDS-OFF.md), [installed screenshots](design/weekends-off/installed-day-off.jpg) and [validation](validation/weekends-off-1.6.0.json).

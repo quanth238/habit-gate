@@ -185,12 +185,12 @@ struct GateSyncStatus: View {
     @ObservedObject var store: GateStore
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 7) {
-            Circle().fill(store.hasKey && store.snapshot.syncError == nil && store.snapshot.lastSyncedAt != nil ? GateTheme.green : Color.orange)
+            Circle().fill(store.snapshot.isWeekendDayOff || (store.hasKey && store.snapshot.syncError == nil && store.snapshot.lastSyncedAt != nil) ? GateTheme.green : Color.orange)
                 .frame(width: 6, height: 6).accessibilityHidden(true)
-            Text(store.isLoadingCredentials ? "Waiting for macOS Keychain…" : !store.hasKey ? "Habitify connection needed" : store.isSyncing ? "Checking Habitify…" : store.snapshot.syncError != nil ? "Sync needs attention" :
+            Text(store.snapshot.isWeekendDayOff ? "Weekend day off · No habit checks required" : store.isLoadingCredentials ? "Waiting for macOS Keychain…" : !store.hasKey ? "Habitify connection needed" : store.isSyncing ? "Checking Habitify…" : store.snapshot.syncError != nil ? "Sync needs attention" :
                  store.snapshot.lastSyncedAt.map { "Verified at \($0.formatted(date: .omitted, time: .shortened))" } ?? "Waiting for verification")
                 .font(.system(size: 11)).foregroundStyle(.secondary)
-        }.help(store.credentialNotice ?? store.snapshot.syncError ?? "Changes on other devices appear after reaching Habitify’s cloud.")
+        }.help(store.snapshot.isWeekendDayOff ? "Your local weekend schedule permits access without waiting for Habitify." : store.credentialNotice ?? store.snapshot.syncError ?? "Changes on other devices appear after reaching Habitify’s cloud.")
     }
 }
 
@@ -219,17 +219,20 @@ struct GateNotice: View {
     }
     static func headline(_ store: GateStore) -> String {
         if store.configuration.active == nil { return "Make room for what matters." }
+        if store.snapshot.isWeekendDayOff { return "A little room to recharge." }
         if store.snapshot.access == "allowed" { return store.snapshot.dueCount == 0 ? "A little room to recharge." : "Your effort. Your time." }
         if store.snapshot.habits.contains(where: { $0.status == "configuration" }) { return "Let’s check your essentials." }
         return "Make room for what matters."
     }
     static func status(_ store: GateStore) -> String {
         if store.configuration.active == nil { return "Setup needed" }
+        if store.snapshot.isWeekendDayOff { return "Weekend day off" }
         if store.temporaryAccess.grant() != nil { return "App time available · sites locked" }
         return store.snapshot.access == "allowed" ? "Distractions unlocked" : "Distractions locked"
     }
     static func summary(_ store: GateStore) -> String {
         if store.configuration.active == nil { return "Connect Habitify and choose your daily essentials." }
+        if store.snapshot.isWeekendDayOff { return "No habit restrictions on Saturday and Sunday. Weekday rules resume Monday at 4 AM." }
         if store.snapshot.access == "allowed" { return "Your selected sites and apps are available until 4 AM." }
         if store.snapshot.habits.isEmpty { return store.snapshot.reason }
         return "\(store.snapshot.remainingCount) essential\(store.snapshot.remainingCount == 1 ? "" : "s") left before social time."

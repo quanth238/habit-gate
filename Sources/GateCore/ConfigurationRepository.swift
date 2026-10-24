@@ -59,7 +59,11 @@ public enum ConfigurationRepository {
         config.advance(now: now, calendar: calendar)
         let policy = config.active
         let domains = policy?.domains ?? config.draft?.domains ?? cached?.domains ?? DomainRules.defaults
-        var result = cached?.sanitized(at: now, calendar: calendar) ?? .locked(now: now, calendar: calendar, domains: domains)
+        if !loaded.needsRecovery, let dayOff = WeekendSchedule.snapshot(configuration: config, cached: cached, now: now, calendar: calendar) { return dayOff }
+        // A cached local day off is never habit-completion evidence after the
+        // schedule is disabled or the next weekday begins.
+        let habitProof = cached?.verificationSource == WeekendSchedule.source ? nil : cached
+        var result = habitProof?.sanitized(at: now, calendar: calendar) ?? .locked(now: now, calendar: calendar, domains: domains)
         if loaded.needsRecovery || config.disconnected == true || policy == nil || Set(result.habits.map(\.id)) != Set(policy?.habitIDs ?? []) ||
             (result.access == "allowed" && result.remainingCount > 0) {
             result = .locked(now: now, calendar: calendar, domains: domains,

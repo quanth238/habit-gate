@@ -84,6 +84,7 @@ public struct Configuration: Codable, Equatable {
     public var notifyOnUnlock: Bool
     public var draft: Policy?
     public var disconnected: Bool?
+    public var weekendsOff: Bool?
     public init(active: Policy? = nil, pending: PendingPolicy? = nil, notifyOnUnlock: Bool = false) {
         self.active = active; self.pending = pending; self.notifyOnUnlock = notifyOnUnlock
     }
@@ -144,6 +145,11 @@ public struct GateSnapshot: Codable, Equatable {
     public var syncError: String?
     public var syncState: String?
     public var guardedApps: [BlockedApp]?
+    // Legacy browser adapters use lastSyncedAt as the proof timestamp. A local
+    // weekend proof names its source and preserves the real Habitify sync below.
+    public var verificationSource: String?
+    public var lastHabitifySyncedAt: Date?
+    public var isWeekendDayOff: Bool { access == "allowed" && verificationSource == WeekendSchedule.source }
     public var remainingCount: Int { habits.filter { $0.due && $0.status != "completed" }.count }
     public var dueCount: Int { habits.filter(\.due).count }
     public var completedCount: Int { habits.filter { $0.due && $0.status == "completed" }.count }
@@ -156,6 +162,8 @@ public struct GateSnapshot: Codable, Equatable {
     }
     public func valid(at now: Date, calendar: Calendar = .current) -> Bool {
         let day = HabitDay(now: now, calendar: calendar)
+        if verificationSource == WeekendSchedule.source,
+           !WeekendSchedule.isWeekend(at: now, calendar: calendar) || habits.contains(where: { $0.due || $0.status != "notDue" }) { return false }
         return version == 1 && habitDate == day.date && utcOffsetMinutes == calendar.timeZone.secondsFromGMT(for: now) / 60 &&
             (access != "allowed" || habits.allSatisfy { $0.status != "configuration" && (!$0.due || $0.status == "completed") }) &&
             now < expiresAt && expiresAt <= day.end && (lastSyncedAt.map { $0 <= now.addingTimeInterval(5) } ?? false)

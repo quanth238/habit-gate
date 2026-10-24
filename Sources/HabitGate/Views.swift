@@ -37,7 +37,7 @@ struct TodayView: View {
                     .font(.system(size: 9)).foregroundStyle(.secondary)
             }.padding(.bottom, 8)
             if store.snapshot.access == "allowed" {
-                Text(store.snapshot.dueCount == 0 ? "Verified rest day. No essentials are scheduled." : "All scheduled essentials are complete.")
+                Text(store.snapshot.isWeekendDayOff ? "Weekend day off. No habit restrictions." : store.snapshot.dueCount == 0 ? "Verified rest day. No essentials are scheduled." : "All scheduled essentials are complete.")
                     .font(.system(size: 12)).foregroundStyle(.secondary).padding(.vertical, 12)
             } else if store.snapshot.habits.isEmpty {
                 Text(store.snapshot.reason).font(.system(size: 12)).foregroundStyle(.secondary)
@@ -184,7 +184,7 @@ struct SettingsView: View {
                                 }
                                 if page == .temporary {
                                     Spacer(minLength: 12)
-                                    GatePill(text: "\(store.temporaryAccess.budget.todayMinutes) min daily", symbol: "clock")
+                                    if !store.snapshot.isWeekendDayOff { GatePill(text: "\(store.temporaryAccess.budget.todayMinutes) min daily", symbol: "clock") }
                                     Button { store.toggleFullScreen?() } label: {
                                         Image(systemName: "arrow.up.left.and.arrow.down.right")
                                             .font(.system(size: 13)).padding(6)
@@ -253,8 +253,8 @@ struct SettingsView: View {
             Spacer()
             VStack(alignment: .leading, spacing: 7) {
                 HStack(spacing: 7) {
-                    Circle().fill(store.hasKey && store.snapshot.syncError == nil ? GateTheme.green : Color.orange).frame(width: 6, height: 6)
-                    Text(store.isLoadingCredentials ? "Opening Keychain…" : !store.hasKey ? "Connect Habitify" : store.snapshot.syncError == nil ? "Habitify connected" : "Check connection").font(.system(size: 11, weight: .medium))
+                    Circle().fill(store.snapshot.isWeekendDayOff || (store.hasKey && store.snapshot.syncError == nil) ? GateTheme.green : Color.orange).frame(width: 6, height: 6)
+                    Text(store.snapshot.isWeekendDayOff ? "Weekend day off" : store.isLoadingCredentials ? "Opening Keychain…" : !store.hasKey ? "Connect Habitify" : store.snapshot.syncError == nil ? "Habitify connected" : "Check connection").font(.system(size: 11, weight: .medium))
                 }
                 if page != .temporary { Text("Resets daily at 4 AM").font(.system(size: 10)).foregroundStyle(.secondary).padding(.leading, 13) }
             }.padding(22)
@@ -483,6 +483,14 @@ struct SettingsView: View {
             GateCard {
                 VStack(alignment: .leading, spacing: 18) {
                     Text("Your daily routine").font(.system(size: 14, weight: .semibold))
+                    Toggle(isOn: Binding(get: { store.configuration.weekendsOff == true }, set: { store.setWeekendsOff($0) })) {
+                        VStack(alignment: .leading, spacing: 5) {
+                            Text("Take weekends off").font(.system(size: 13, weight: .medium))
+                            Text("No app or website restrictions from Saturday 4 AM to Monday 4 AM. Works offline; changes apply immediately.")
+                                .font(.system(size: 11)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                        }.frame(maxWidth: .infinity, alignment: .leading)
+                    }.toggleStyle(.switch).disabled(store.needsRecovery).accessibilityLabel("Take weekends off")
+                    Divider().overlay(GateTheme.line)
                     Toggle(isOn: Binding(get: { store.loginEnabled }, set: { store.setLogin($0) })) {
                         VStack(alignment: .leading, spacing: 5) {
                             Text("Launch Habit Gate at login").font(.system(size: 13, weight: .medium))

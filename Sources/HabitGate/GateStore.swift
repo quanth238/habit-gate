@@ -54,7 +54,7 @@ import UniformTypeIdentifiers
         configuration = loaded.configuration
         needsRecovery = loaded.needsRecovery; storageIssue = loaded.issue ?? ""
         snapshot = ConfigurationRepository.snapshot(for: loaded, cached: GateFiles.read(GateSnapshot.self, "snapshot.json", root: root))
-        snapshot.syncState = nil
+        if !snapshot.isWeekendDayOff { snapshot.syncState = nil }
         catalog = GateFiles.read([Habit].self, "catalog.json", root: root) ?? []
         if !needsRecovery, FileManager.default.fileExists(atPath: root.appendingPathComponent("configuration.json").path),
            !FileManager.default.fileExists(atPath: root.appendingPathComponent("configuration.last-good.json").path) {
@@ -138,16 +138,19 @@ import UniformTypeIdentifiers
                 } else if let policy = updated.active { snapshot.domains = policy.domains }
             } catch { snapshot.access = "blocked"; persistSnapshot(); return }
         }
-        if !snapshot.valid(at: now), snapshot.access == "allowed" || snapshot.habitDate != HabitDay(now: now).date || snapshot.utcOffsetMinutes != TimeZone.current.secondsFromGMT(for: now) / 60 {
+        if refreshWeekendSchedule(now: now) {
+            if message != snapshot.reason { message = snapshot.reason }
+        } else if snapshot.verificationSource == WeekendSchedule.source || (!snapshot.valid(at: now) && (snapshot.access == "allowed" || snapshot.habitDate != HabitDay(now: now).date || snapshot.utcOffsetMinutes != TimeZone.current.secondsFromGMT(for: now) / 60)) {
             snapshot = .locked(domains: configuration.active?.domains ?? DomainRules.defaults, reason: "A new habit day needs verification.")
-            lastAttempt = .distantPast
+            message = snapshot.reason
+            lastAttempt = .distantPast; retryAt = .distantPast
         }
         let latestClients = GateFiles.browserClients()
         // Heartbeat timestamps determine liveness in GateFiles; the UI only needs
         // profile identity and coverage changes, rather than every heartbeat.
         if !sameBrowserCoverage(clients, latestClients) { clients = latestClients }
         persistSnapshot()
-        if forceSync && now < retryAt { message = "Unable to sync yet. Retry after \(retryAt.formatted(date: .omitted, time: .shortened)). Using only previously verified state." }
+        if forceSync && now < retryAt && !snapshot.isWeekendDayOff { message = "Unable to sync yet. Retry after \(retryAt.formatted(date: .omitted, time: .shortened)). Using only previously verified state." }
         let due = forceSync || now.timeIntervalSince(lastAttempt) >= 60
         if due && now >= retryAt && now.timeIntervalSince(lastAttempt) >= 3 && key != nil {
             Task { await self.sync() }
@@ -293,6 +296,7 @@ import UniformTypeIdentifiers
         NSWorkspace.shared.openApplication(at: url, configuration: .init()) { _, _ in }
     }
     func sync() async {
+        if refreshWeekendSchedule() { message = snapshot.reason; persistSnapshot() }
         guard let key, !isSyncing, !needsRecovery, configuration.disconnected != true, Date() >= retryAt else { return }
         isSyncing = true; defer { isSyncing = false }
         lastAttempt = Date()
@@ -307,6 +311,11 @@ import UniformTypeIdentifiers
             guard HabitDay(now: Date()).date == day.date,
                   configuration.active == policy, self.key == usedKey, configuration.disconnected != true else { lastAttempt = .distantPast; return }
             try updateCatalog(habits)
+            if refreshWeekendSchedule() {
+                snapshot.lastHabitifySyncedAt = Date(); snapshot.lastSyncedAt = snapshot.lastHabitifySyncedAt
+                failures = 0; retryAt = .distantPast
+                message = snapshot.reason; persistSnapshot(); return
+            }
             let wasAllowed = snapshot.sanitized(at: Date()).access == "allowed"
             if let policy {
                 snapshot = PolicyEngine.evaluate(policy: policy, habits: habits, journal: journal, now: Date())
@@ -323,10 +332,17 @@ import UniformTypeIdentifiers
             var delay = base
             if case let APIError.response(_, requested) = error { delay = max(base, requested ?? 0) }
             retryAt = Date().addingTimeInterval(delay)
+            if refreshWeekendSchedule() { message = snapshot.reason; persistSnapshot(); return }
             snapshot = snapshot.sanitized(at: Date()); snapshot.syncError = safeMessage(error); snapshot.syncState = "failed"
             message = snapshot.syncError!
             persistSnapshot()
         }
+    }
+    @discardableResult private func refreshWeekendSchedule(now: Date = Date()) -> Bool {
+        guard !needsRecovery, storageIssue.isEmpty,
+              let dayOff = WeekendSchedule.snapshot(configuration: configuration, cached: snapshot, habits: catalog, now: now) else { return false }
+        snapshot = dayOff
+        return true
     }
     private func safeMessage(_ error: Error) -> String {
         // Never show server response bodies, request headers, or the submitted API key.
@@ -419,6 +435,13 @@ import UniformTypeIdentifiers
         do { try commitConfiguration(next); configuration = next }
         catch { return }
         if enabled { UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in } }
+    }
+    func setWeekendsOff(_ enabled: Bool) {
+        guard !needsRecovery else { return }
+        var next = configuration; next.weekendsOff = enabled ? true : nil
+        do { try commitConfiguration(next); configuration = next }
+        catch { return }
+        tick(forceSync: true)
     }
     private func notify() {
         let c = UNMutableNotificationContent(); c.title = "Your essential habits are complete"; c.body = "Your selected websites and Mac apps are unlocked until 4 AM."

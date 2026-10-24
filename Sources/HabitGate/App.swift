@@ -52,7 +52,7 @@ import Darwin
     private func updateStatus() {
         let allowed = store.snapshot.access == "allowed"
         status.button?.image = NSImage(systemSymbolName: allowed ? "lock.open" : "lock.shield", accessibilityDescription: allowed ? "Distractions unlocked" : "Distractions blocked")
-        status.button?.title = store.configuration.active == nil ? " Set up" : allowed ? " Ready" :
+        status.button?.title = store.configuration.active == nil ? " Set up" : store.snapshot.isWeekendDayOff ? " Day off" : allowed ? " Ready" :
             store.snapshot.habits.isEmpty ? " Checking" : " \(store.snapshot.remainingCount) left"
         if store.temporaryAccess.isCounting {
             status.button?.image = NSImage(systemSymbolName: "timer", accessibilityDescription: "Temporary app access")

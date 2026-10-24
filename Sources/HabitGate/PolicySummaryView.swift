@@ -6,9 +6,12 @@ struct PolicySummaryView: View {
     var body: some View {
         GateCard(padding: 16) {
             VStack(alignment: .leading, spacing: 10) {
-                Text("Active essentials · today").font(.system(size: 13, weight: .semibold))
+                Text(store.configuration.weekendsOff == true ? "Your weekday essentials" : "Active essentials · today").font(.system(size: 13, weight: .semibold))
                 Text(names(store.configuration.active?.habitIDs ?? []))
                     .font(.system(size: 12)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                if store.configuration.weekendsOff == true {
+                    Text("Saturday and Sunday off · 4 AM reset").font(.system(size: 11)).foregroundStyle(GateTheme.blue)
+                }
                 if let pending = store.configuration.pending, Set(pending.policy.habitIDs) != Set(store.configuration.active?.habitIDs ?? []) {
                     Divider()
                     Text("Scheduled · \(pending.effectiveAt.formatted(date: .abbreviated, time: .shortened))")

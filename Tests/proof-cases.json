@@ -334,5 +334,95 @@
       ]
     },
     "allowed": false
+  },
+  {
+    "name": "weekend local schedule works without an API sync",
+    "now": "2026-10-24T05:00:00Z",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "snapshot": {
+      "version": 1,
+      "habitDate": "2026-10-24",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "utcOffsetMinutes": 420,
+      "expiresAt": "2026-10-24T21:00:00Z",
+      "access": "allowed",
+      "reason": "Weekend day off",
+      "habits": [
+        {
+          "id": "a",
+          "name": "Weekday essential",
+          "due": false,
+          "status": "notDue",
+          "detail": "Weekend day off"
+        }
+      ],
+      "domains": [
+        "x.com"
+      ],
+      "lastSyncedAt": "2026-10-24T00:00:00Z",
+      "verificationSource": "weekendSchedule",
+      "syncState": "scheduledDayOff"
+    },
+    "allowed": true
+  },
+  {
+    "name": "weekend local schedule expires on Monday at 4 AM",
+    "now": "2026-10-25T21:00:00Z",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "snapshot": {
+      "version": 1,
+      "habitDate": "2026-10-25",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "utcOffsetMinutes": 420,
+      "expiresAt": "2026-10-25T21:00:00Z",
+      "access": "allowed",
+      "reason": "Weekend day off",
+      "habits": [
+        {
+          "id": "a",
+          "name": "Weekday essential",
+          "due": false,
+          "status": "notDue",
+          "detail": "Weekend day off"
+        }
+      ],
+      "domains": [
+        "x.com"
+      ],
+      "lastSyncedAt": "2026-10-25T00:00:00Z",
+      "verificationSource": "weekendSchedule",
+      "syncState": "scheduledDayOff"
+    },
+    "allowed": false
+  },
+  {
+    "name": "Sunday schedule remains valid on Monday at 03:59",
+    "now": "2026-10-25T20:59:00Z",
+    "timezone": "Asia/Ho_Chi_Minh",
+    "snapshot": {
+      "version": 1,
+      "habitDate": "2026-10-25",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "utcOffsetMinutes": 420,
+      "expiresAt": "2026-10-25T21:00:00Z",
+      "access": "allowed",
+      "reason": "Weekend day off",
+      "habits": [
+        {
+          "id": "a",
+          "name": "Weekday essential",
+          "due": false,
+          "status": "notDue",
+          "detail": "Weekend day off"
+        }
+      ],
+      "domains": [
+        "x.com"
+      ],
+      "lastSyncedAt": "2026-10-25T00:00:00Z",
+      "verificationSource": "weekendSchedule",
+      "syncState": "scheduledDayOff"
+    },
+    "allowed": true
   }
 ]

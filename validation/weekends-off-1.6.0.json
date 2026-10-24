@@ -1,0 +1,67 @@
+{
+  "date": "2026-10-24",
+  "nativeVersion": "1.6.0",
+  "nativeBuild": 22,
+  "chromeVersion": "1.1.1",
+  "schedule": {
+    "enabled": true,
+    "localStart": "Saturday 04:00",
+    "localEnd": "Monday 04:00",
+    "followsExistingHabitDay": true
+  },
+  "checks": {
+    "swiftTestsPassed": 99,
+    "browserTestsPassed": 20,
+    "releaseBuildPassed": true,
+    "installedSignatureAndNativeHostPassed": true,
+    "weekendsOffEnabled": true,
+    "weekendAccessAllowed": true,
+    "weekdayRulesPreserved": true,
+    "dailyUsageAndLimitPreserved": true,
+    "noHabitsMarkedComplete": true,
+    "installedBinaryMatchesDist": true,
+    "settingSwitchObservedOn": true,
+    "noTimerWeekendUIObserved": true,
+    "currentChromePolicyAcceptsLiveSnapshot": true,
+    "currentChromePolicyRejectsSnapshotAtExpiry": true
+  },
+  "recentChromeReports": [
+    {
+      "extensionVersion": "1.1.1",
+      "permissionsOK": true,
+      "rulesOK": true
+    }
+  ],
+  "boundariesTested": [
+    "Saturday 00:00 remains Friday",
+    "Saturday 03:59:59 to 04:00",
+    "Sunday local proof renewal",
+    "Monday 03:59:59 to 04:00",
+    "timezone invalidation"
+  ],
+  "otherTests": [
+    "Default-off legacy configuration loading",
+    "Offline without API proof or catalog",
+    "Local proof reuse",
+    "Real Habitify timestamp preservation",
+    "No completion fabrication",
+    "Immediate setting persistence and disabling",
+    "Recovery cannot bypass restrictions",
+    "Native and browser shared proof fixtures"
+  ],
+  "limitations": [
+    "Physical Wi-Fi, timezone and system clock settings were not changed; offline and time boundaries use controlled test dates and cached state.",
+    "Browser validator and installed profile reports were checked; no personal social-media page or installed chat app was opened for this change.",
+    "No new performance benchmark or full accessibility audit."
+  ],
+  "screenshots": {
+    "design/weekends-off/installed-day-off.jpg": [
+      2170,
+      1618
+    ],
+    "design/weekends-off/installed-settings.jpg": [
+      2170,
+      1618
+    ]
+  }
+}

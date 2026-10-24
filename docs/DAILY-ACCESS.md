@@ -1,4 +1,4 @@
-# Daily app access — native 1.5.5
+# Daily app access — native 1.6.0
 
 Choose **Start access** when you need a blocked Mac app and **End access** when finished. All configured blocked apps share **15 minutes per habit day** by default. Starting again uses the time left; it never creates another 15 minutes.
 
@@ -73,6 +73,10 @@ Switching apps, sleep and screen lock do not pause accounting. Clean exit ends a
 
 The saved reset deadline stays fixed during a timezone change. At that deadline, the next period uses the current local 4 AM boundary. This avoids an immediate extra allowance from changing timezones.
 
+## Optional weekend schedule
+
+With **Settings → Your daily routine → Take weekends off** enabled, configured apps and websites are unrestricted from Saturday 4 AM to Monday 4 AM. The daily allowance does not run, and the access page displays “No timer needed.” Habitify progress and weekday selections are unchanged. The local schedule works during an API outage; normal weekday verification resumes at Monday's boundary. The setting applies immediately, and installations without it retain their original behavior. See [the full specification](WEEKENDS-OFF.md).
+
 ## Interface and accessibility
 
 The app opens its countdown page after setup. The interface uses an open canvas, a thin clock dial with subtle ticks, tabular timer digits and one compact Start or End action. Ready, Access on and Time used today labels accompany the visual state. A header chip shows the daily limit; centered app icons and metadata show coverage, reset time and the settings shortcut. Settings places Interface size first, followed by allowance editing, login and notification preferences. The 1.5.4 layout centers the entire interaction group with balanced surrounding space and bounds the clock to 220–340 points. Minimum 880 × 680 and full-screen layouts keep the controls at readable proportions. The main window remembers its frame and initially fills the screen's visible area; login startup remains quiet.
@@ -105,7 +109,7 @@ The redesign follows a [generated concept and exact prompt](../design/temporary-
 
 ### Performance limits
 
-The earlier 1.5.0 warm closed-window sample measured **0.673% CPU and 108.16 MB mean RSS**, exceeding the original <0.5% / <100 MB targets. See `validation/daily-access-1.5.0.json` for sample conditions and earlier results. The 1.5.2–1.5.5 flow/layout updates have not been benchmarked separately; no performance improvement is claimed.
+The earlier 1.5.0 warm closed-window sample measured **0.673% CPU and 108.16 MB mean RSS**, exceeding the original <0.5% / <100 MB targets. See `validation/daily-access-1.5.0.json` for sample conditions and earlier results. The 1.5.2–1.6.0 flow/layout updates have not been benchmarked separately; no performance improvement is claimed.
 
 ## Rollback
 

@@ -75,6 +75,7 @@ struct DailyAccessCard: View {
     private var labelSize: CGFloat { min(13, max(11, 11 * dialScale)) }
     private var apps: [BlockedApp] { store.configuration.active?.apps ?? [] }
     private var state: String {
+        if store.snapshot.isWeekendDayOff { return "Weekend day off" }
         if store.normalAccess { return "Apps unlocked" }
         if !access.issue.isEmpty || store.needsRecovery { return "Needs attention" }
         if apps.isEmpty { return "No apps selected" }
@@ -82,6 +83,7 @@ struct DailyAccessCard: View {
         return access.accessStarted ? "Access on" : "Ready"
     }
     private var caption: String {
+        if store.snapshot.isWeekendDayOff { return "Apps and websites are available. Weekday rules resume Monday at 4 AM." }
         if store.normalAccess { return "Your essentials are complete. Enjoy your time." }
         if apps.isEmpty { return "Choose the apps to protect in Mac apps." }
         if access.remaining <= 0 { return "Complete your essentials or wait for the daily reset." }
@@ -89,6 +91,19 @@ struct DailyAccessCard: View {
     }
     var body: some View {
         if compact { compactCard }
+        else if store.snapshot.isWeekendDayOff {
+            VStack(spacing: 18) {
+                Image(systemName: "sun.max").font(.system(size: 44, weight: .light)).foregroundStyle(GateTheme.blue)
+                    .accessibilityHidden(true)
+                Text("Enjoy your weekend.").font(.system(size: 28, weight: .semibold)).tracking(-0.6)
+                Text(caption).font(.system(size: 13)).foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center).fixedSize(horizontal: false, vertical: true)
+                HStack(spacing: 9) {
+                    ForEach(Array(apps.prefix(5))) { app in MacAppIcon(app: app).help(app.name).accessibilityLabel(app.name) }
+                }.padding(.top, 8)
+                Label("No timer needed", systemImage: "lock.open").font(.system(size: 11)).foregroundStyle(GateTheme.green)
+            }.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        }
         else {
             VStack(spacing: 0) {
                 liveCountdown
@@ -202,7 +217,7 @@ struct DailyAccessCard: View {
             HStack(spacing: 6) {
                 Text("Resets at \(access.budget.resetsAt.formatted(date: .omitted, time: .shortened))")
                 Text("·").accessibilityHidden(true)
-                Label("Websites stay protected", systemImage: "lock.shield")
+                Label(store.normalAccess ? "Websites available" : "Websites stay protected", systemImage: store.normalAccess ? "checkmark.shield" : "lock.shield")
                 Button { store.requestTemporaryAccess(settings: true) } label: { Image(systemName: "gearshape") }
                     .buttonStyle(.plain).foregroundStyle(.secondary).help("Daily allowance settings")
                     .accessibilityLabel("Daily allowance settings")
