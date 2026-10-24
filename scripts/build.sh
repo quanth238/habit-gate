@@ -5,7 +5,7 @@ cd "$HG_PROJECT"
 swift build -c release --product HabitGate
 swift build -c release --product HabitGateBridge
 HG_BIN="$(swift build -c release --show-bin-path)"
-HG_APP="$HG_PROJECT/dist/Habit Gate.app"
+HG_APP="$HG_PROJECT/dist.noindex/Habit Gate.app"
 mkdir -p "$HG_APP/Contents/MacOS" "$HG_APP/Contents/Resources"
 cp "$HG_BIN/HabitGate" "$HG_APP/Contents/MacOS/HabitGate"
 cp "$HG_BIN/HabitGateBridge" "$HG_APP/Contents/MacOS/HabitGateBridge"

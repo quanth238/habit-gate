@@ -26,7 +26,7 @@ Review records and screenshots reflect private testing on the author's Mac. Vers
 
 ## Start
 
-The built app is in `dist/Habit Gate.app`. `scripts/install.sh` installs it in `/Applications/Habit Gate.app`, registers the per-user Chrome native messaging host, and copies the extension into:
+The built app is in `dist.noindex/Habit Gate.app` (excluded from Spotlight app search). `scripts/install.sh` installs it in `/Applications/Habit Gate.app`, registers the per-user Chrome native messaging host, and copies the extension into:
 
 `~/Library/Application Support/HabitGate/ChromeExtension`
 
@@ -194,3 +194,8 @@ Appearance uses a separate local preference. Protection rules, the daily balance
 Settings → Your daily routine → **Take weekends off** allows configured websites and Mac apps from Saturday at 4 AM through Monday at 4 AM, using the same local habit-day boundary as the rest of the app. It works without a Habitify response and does not spend the daily app allowance. The main access page shows “Enjoy your weekend” and “No timer needed.” Weekday rules resume automatically.
 
 This optional setting applies immediately and defaults off for existing installations. It was enabled on the author's Mac at the user's request. The schedule runs locally; Habitify habits are not edited or marked completed. Chrome 1.1.1 and its permissions are unchanged. All 99 Swift tests and 20 browser tests pass. See the [behavior and architecture](docs/WEEKENDS-OFF.md), [installed screenshots](design/weekends-off/installed-day-off.jpg) and [validation](validation/weekends-off-1.6.0.json).
+
+
+## Development app copies
+
+Only `/Applications/Habit Gate.app` should appear as the normal installed app. Build staging lives in `dist.noindex/`; the installer unregisters that staging bundle and refreshes the installed app's registration. Save rollback copies as verified ZIP archives in a private `.noindex` folder, and keep test/preview bundles in `.noindex` folders until they are archived. This prevents development builds from cluttering Spotlight's application list. The 24 October cleanup archived older app copies without changing the installed app or personal settings.

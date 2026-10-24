@@ -1,0 +1,38 @@
+{
+  "date": "2026-10-24",
+  "installedNativeVersion": "1.6.0",
+  "scope": "Development-bundle and app-index cleanup; installed application code and user settings were not changed.",
+  "checks": {
+    "verifiedRollbackArchives": 38,
+    "allArchivesStillVerified": true,
+    "originalsMovedToRecoverableTrash": true,
+    "installedExecutableUnchanged": true,
+    "configurationUnchanged": true,
+    "dailyUsageAndLimitsUnchanged": true,
+    "weekendsOffPreserved": true,
+    "buildStagingExcludedFromSearch": true,
+    "shellSyntaxChecked": true,
+    "installedSignatureAndNativeProtocolPassed": true,
+    "bundleIDOpensCurrentInstalledApp": true,
+    "globalLaunchServicesResetUsed": false
+  },
+  "registeredHabitGateApps": [
+    "/Applications/Habit Gate.app"
+  ],
+  "spotlightHabitAppResults": [
+    "/Applications/Habitify.app",
+    "/Applications/Habit Gate.app"
+  ],
+  "prevention": [
+    "Build into dist.noindex",
+    "Unregister staging during installation",
+    "Archive rollback builds as verified ZIP files",
+    "Keep previews inside .noindex folders and unregister when finished",
+    "Repository AGENTS.md records the workflow"
+  ],
+  "limitations": [
+    "Spotlight popup was not visually verified; its metadata results and Launch Services registration were queried directly. The app was successfully opened by its unique bundle identifier.",
+    "No Swift or browser code changed; native/browser test suites were not rerun.",
+    "Trash was not emptied; backup ZIP archives and recoverable originals were retained."
+  ]
+}

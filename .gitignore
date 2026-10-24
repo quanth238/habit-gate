@@ -2,6 +2,7 @@
 .swiftpm/
 .DS_Store
 dist/
+dist.noindex/
 *.log
 *.xcuserstate
 
