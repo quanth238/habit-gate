@@ -76,7 +76,7 @@ The test script explicitly loads the bundled Swift Testing macro plugin where ne
 
 Builds are locally ad-hoc signed and are not notarized distribution builds. Updating an installed app can require Keychain access to be allowed again. Quit the app before installing an update. Updating unpacked extension files requires choosing Reload in Chrome's extension page.
 
-The app includes a blue shield-and-check icon in every standard macOS size. `Resources/AppIcon.icns` is bundled by the build script. To regenerate it from its native vector drawing source, run `./scripts/build-icon.sh`, then rebuild and install the app. The menu-bar icon stays a system template symbol so it remains readable in light and dark appearances.
+The app includes a blue shield-and-check icon in every standard macOS size. `Resources/AppIcon.icns` is bundled by the build script. The installer refreshes the installed bundle and icon timestamps, its Launch Services registration, and Spotlight metadata to avoid retaining an older placeholder icon. Reopen app search if it was open during an update. To regenerate the icon from its native vector drawing source, run `./scripts/build-icon.sh`, then rebuild and install the app. The menu-bar icon stays a system template symbol so it remains readable in light and dark appearances.
 
 ## Visuals and validation
 

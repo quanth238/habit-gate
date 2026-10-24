@@ -1,0 +1,30 @@
+{
+  "date": "2026-10-24",
+  "installedNativeVersion": "1.6.0 (22)",
+  "scope": "Refresh the installed app's icon and metadata; prevent preserved installation timestamps from leaving a stale placeholder.",
+  "findings": {
+    "bundledIconPresent": true,
+    "workspaceIconResolvedToBlueShieldBeforeRefresh": true,
+    "installedBundleModificationDateBeforeRefresh": "2026-10-17T17:52:26Z",
+    "staleSearchCache": "Suspected from the user's search screenshot; the icon asset itself was valid."
+  },
+  "repair": [
+    "Refreshed only the installed bundle, metadata and icon timestamps",
+    "Forced registration of the installed bundle with Launch Services",
+    "Requested Spotlight import of the installed bundle",
+    "Added these refresh steps to the installer"
+  ],
+  "checks": {
+    "finderInfoShowsBlueShieldAndCheck": true,
+    "installedSignatureAndNativeProtocolPassed": true,
+    "installerShellSyntaxPassed": true,
+    "gitDiffWhitespacePassed": true,
+    "nativeRebuildOrResigningRequired": false,
+    "globalCacheOrLaunchServicesResetUsed": false
+  },
+  "limitations": [
+    "Finder's Get Info icon and preview were visually verified. Spotlight search could not be opened through the UI automation service; its launch request failed. Reopen any existing search panel to reload its contents.",
+    "Installer refresh steps were applied directly to the installed bundle. The complete installer was not rerun while Habit Gate was running.",
+    "No Swift or browser source changed; their test suites were not rerun."
+  ]
+}

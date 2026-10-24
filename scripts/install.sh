@@ -14,6 +14,10 @@ fi
 mkdir -p "$HG_SUPPORT/ChromeExtension"
 chmod 700 "$HG_SUPPORT"
 ditto "$HG_BUILD_APP" "$HG_DEST"
+# ditto preserves timestamps. Refresh this bundle's metadata and icon so macOS
+# notices the installed copy instead of retaining an older placeholder icon.
+touch "$HG_DEST/Contents/Info.plist" "$HG_DEST/Contents/Resources/AppIcon.icns" \
+  "$HG_DEST/Contents/Resources" "$HG_DEST/Contents" "$HG_DEST"
 ditto "$HG_PROJECT/extension" "$HG_SUPPORT/ChromeExtension"
 python3 - "$HG_DEST" <<'PY'
 import json,pathlib,sys
@@ -32,6 +36,9 @@ HG_REGISTER='/System/Library/Frameworks/CoreServices.framework/Frameworks/Launch
 if [[ -x "$HG_REGISTER" ]]; then
   "$HG_REGISTER" -u "$HG_BUILD_APP" >/dev/null 2>&1 || true
   "$HG_REGISTER" -f "$HG_DEST" >/dev/null 2>&1 || print -u2 'macOS app registration could not be refreshed automatically.'
+fi
+if [[ -x /usr/bin/mdimport ]]; then
+  /usr/bin/mdimport "$HG_DEST" >/dev/null 2>&1 || print -u2 'Spotlight metadata could not be refreshed automatically.'
 fi
 print "Installed: $HG_DEST"
 print "Load unpacked Chrome extension from: $HG_SUPPORT/ChromeExtension"
